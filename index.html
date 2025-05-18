@@ -193,13 +193,22 @@
   onAuthStateChanged(auth, (user) => {
     if (!user) {
       window.location.href = "login.html";
-    } else if (user.photoURL) {
+    } else {
       const profilePic = document.getElementById("profile-pic");
-      profilePic.src = user.photoURL;
+
+      // If Google profile photo is available
+      if (user.photoURL) {
+        profilePic.src = user.photoURL;
+      } else {
+        // Fallback default avatar (you can use any image here)
+        profilePic.src = "default-avatar.png";  // Make sure this file exists in your project
+      }
+
       profilePic.style.display = "block";
     }
   });
 </script>
+
 
 </body>
 </html>
