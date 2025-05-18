@@ -14,7 +14,7 @@
 
     .background {
       position: relative;
-      background-image: url('background.jpg'); /* Replace with your image */
+      background-image: url('background.jpg');
       background-size: cover;
       background-position: center;
       height: 100vh;
@@ -23,10 +23,8 @@
     .background::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background-color: rgba(0, 0, 0, 0.6);
       z-index: 1;
     }
@@ -74,12 +72,8 @@
     }
 
     @keyframes slideText {
-      0% {
-        transform: translateX(100%);
-      }
-      100% {
-        transform: translateX(-100%);
-      }
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
     }
 
     .button-container h1 {
@@ -116,48 +110,25 @@
     }
 
     @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
 
     @media (max-width: 600px) {
-      .button-container h1 {
-        font-size: 30px;
-      }
-      .btn {
-        width: 90%;
-        margin: 10px auto;
-        display: block;
-      }
+      .button-container h1 { font-size: 30px; }
+      .btn { width: 90%; margin: 10px auto; display: block; }
     }
 
-    /* Profile picture styling */
     #user-profile {
       position: absolute;
       top: 20px;
@@ -170,13 +141,12 @@
       height: 50px;
       border-radius: 50%;
       display: none;
-      border: 2px solid white;
     }
   </style>
 </head>
 <body>
 
-<!-- Google user profile picture -->
+<!-- Google profile picture container -->
 <div id="user-profile">
   <img id="profile-pic" src="" alt="Profile Picture" />
 </div>
@@ -204,7 +174,6 @@
   </div>
 </div>
 
-<!-- Firebase Auth -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
@@ -215,20 +184,19 @@
     projectId: "college-homepage-template",
     storageBucket: "college-homepage-template.appspot.com",
     messagingSenderId: "306557815155",
-    appId: "1:306557815155:web:f805313ab13552af695d06",
-    measurementId: "G-F4D1V9BS6V"
+    appId: "1:306557815155:web:f805313ab13552af695d06"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
   onAuthStateChanged(auth, (user) => {
-    if (user && user.photoURL) {
+    if (!user) {
+      window.location.href = "login.html";
+    } else if (user.photoURL) {
       const profilePic = document.getElementById("profile-pic");
       profilePic.src = user.photoURL;
       profilePic.style.display = "block";
-    } else if (!user) {
-      window.location.href = "login.html";
     }
   });
 </script>
