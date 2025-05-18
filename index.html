@@ -129,6 +129,7 @@
       .btn { width: 90%; margin: 10px auto; display: block; }
     }
 
+    /* Profile avatar and menu */
     #user-profile {
       position: absolute;
       top: 20px;
@@ -142,6 +143,8 @@
       border-radius: 50%;
       display: none;
       cursor: pointer;
+      object-fit: cover;
+      background-color: #ccc;
     }
 
     #profile-menu {
@@ -149,43 +152,42 @@
       position: absolute;
       top: 60px;
       right: 0;
-      background: white;
+      background-color: white;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      z-index: 4;
-      min-width: 150px;
+      width: 180px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 5;
     }
 
-    #profile-menu a, #profile-menu button {
+    #profile-menu button {
       display: block;
       width: 100%;
-      text-align: left;
-      padding: 10px 16px;
-      border: none;
+      padding: 10px;
       background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
       font-size: 14px;
       color: #333;
-      cursor: pointer;
-      text-decoration: none;
     }
 
-    #profile-menu a:hover, #profile-menu button:hover {
+    #profile-menu button:hover {
       background-color: #f0f0f0;
     }
   </style>
 </head>
 <body>
 
-<!-- Profile Avatar & Menu -->
+<!-- Profile picture + dropdown -->
 <div id="user-profile">
   <img id="profile-pic" src="" alt="Profile Picture" />
   <div id="profile-menu">
-    <a href="#" id="manage-account">Manage your account</a>
-    <button id="logout-button">Log out</button>
+    <button id="manage-account-btn">Manage your account</button>
+    <button id="logout-btn">Log out</button>
   </div>
 </div>
 
-<!-- Main Content -->
 <div class="background">
   <div class="button-container">
     <a href="https://samskruti.ac.in/engineering/" target="_blank">
@@ -209,6 +211,7 @@
   </div>
 </div>
 
+<!-- Firebase auth and profile menu toggle -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
@@ -227,37 +230,54 @@
 
   const profilePic = document.getElementById("profile-pic");
   const profileMenu = document.getElementById("profile-menu");
-  const logoutButton = document.getElementById("logout-button");
-  const manageAccountLink = document.getElementById("manage-account");
+  const manageBtn = document.getElementById("manage-account-btn");
+  const logoutBtn = document.getElementById("logout-btn");
 
-  // Show/Hide Profile Menu
+  // Toggle profile menu display
   profilePic.addEventListener("click", () => {
     profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
   });
 
-  // Log out
-  logoutButton.addEventListener("click", () => {
-    signOut(auth).then(() => {
-      window.location.href = "login.html";
-    });
-  });
-
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-    } else {
-      profilePic.src = user.photoURL || "assets/images/default-avatar.png";
-      profilePic.style.display = "block";
-
-      // Always open Google Account settings for signed-in user
-      manageAccountLink.href = "https://myaccount.google.com";
+  // Hide menu if clicking outside
+  window.addEventListener("click", (e) => {
+    if (!profileMenu.contains(e.target) && e.target !== profilePic) {
+      profileMenu.style.display = "none";
     }
   });
 
-  // Hide menu when clicking outside
-  document.addEventListener("click", (e) => {
-    if (!document.getElementById("user-profile").contains(e.target)) {
-      profileMenu.style.display = "none";
+  // Log out handler
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    }).catch((error) => {
+      console.error("Sign out error:", error);
+    });
+  });
+
+  // Manage account handler: redirect based on login method
+  manageBtn.addEventListener("click", () => {
+    const user = auth.currentUser;
+    if (user) {
+      if (user.providerData.some(p => p.providerId === "google.com")) {
+        // Google signed in user: redirect to their Google Account page
+        window.open("https://myaccount.google.com/", "_blank");
+      } else {
+        // Non-Google users: redirect to Firebase generic account management or your own page
+        alert("Account management is not available for email/password users.");
+      }
+    }
+    profileMenu.style.display = "none";
+  });
+
+  // Monitor auth state
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      // Not logged in, redirect to login page
+      window.location.href = "login.html";
+    } else {
+      // Show profile pic if available, otherwise default avatar
+      profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+      profilePic.style.display = "block";
     }
   });
 </script>
