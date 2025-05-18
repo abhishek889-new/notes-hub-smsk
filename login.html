@@ -95,9 +95,8 @@
   </div>
 </div>
 
-<!-- Firebase SDKs -->
+<!-- Firebase SDK -->
 <script type="module">
-  // Firebase v9 modular import
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import {
     getAuth,
@@ -120,20 +119,18 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // Show/Hide Forms
-  function showSignup() {
+  window.showSignup = function () {
     document.getElementById("login-form").classList.add("hidden");
     document.getElementById("signup-form").classList.remove("hidden");
     document.getElementById("form-title").innerText = "Sign Up";
-  }
+  };
 
-  function showLogin() {
+  window.showLogin = function () {
     document.getElementById("signup-form").classList.add("hidden");
     document.getElementById("login-form").classList.remove("hidden");
     document.getElementById("form-title").innerText = "Login";
-  }
+  };
 
-  // Signup
   window.signup = function () {
     const email = document.getElementById("signup-email").value;
     const password = document.getElementById("signup-password").value;
@@ -147,14 +144,13 @@
     createUserWithEmailAndPassword(auth, email, password)
       .then(() => {
         alert("Signup successful");
-        window.location.href = "index.html";
+        showLogin(); // Redirect to login
       })
       .catch((error) => {
         alert("Signup error: " + error.message);
       });
   };
 
-  // Login
   window.login = function () {
     const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-password").value;
@@ -169,7 +165,6 @@
       });
   };
 
-  // Google Login
   window.googleLogin = function () {
     signInWithPopup(auth, provider)
       .then(() => {
