@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,17 +178,12 @@
 <body>
 
 <!-- Profile picture + dropdown -->
-<div id="profile-menu" style="display: none; position: absolute; top: 70px; right: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 1000;">
-  <a href="https://myaccount.google.com" target="_blank" rel="noopener noreferrer"
-     style="display: block; padding: 10px 20px; text-decoration: none; color: black;">
-     Manage your account
-  </a>
-  <hr style="margin: 0;">
-  <button onclick="logout()" style="display: block; width: 100%; padding: 10px 20px; border: none; background: none; text-align: left; cursor: pointer;">
-    Log out
-  </button>
-</div>
-
+<div id="user-profile">
+  <img id="profile-pic" src="" alt="Profile Picture" />
+  <div id="profile-menu">
+    <button onclick="window.location.href='https://myaccount.google.com'">Manage your account</button>
+    <button onclick="logout()">Log out</button>
+  </div>
 </div>
 
 <div class="background">
