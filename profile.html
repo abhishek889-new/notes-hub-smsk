@@ -38,7 +38,7 @@
     body.dark .profile-card {
       background: #1e1e1e;
       color: #e0e0e0;
-      box-shadow: 0 2px 10px rgba(255,255,255,0.1);
+      box-shadow: 0 2px 10px rgba(255,255,255,0.05);
     }
 
     img {
@@ -58,30 +58,33 @@
     }
 
     button, select {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 10px 20px;
-      border: none;
-      background: #007bff;
-      color: white;
+      border: 1px solid #ccc;
+      background: white;
+      color: #121212;
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
       width: 100%;
       box-sizing: border-box;
     }
 
     button:hover, select:hover {
-      background: #0056b3;
+      background: #e0e0e0;
     }
 
-    body.dark button, body.dark select {
-      background: #3399ff;
-      color: #121212;
+    body.dark button,
+    body.dark select {
+      background: #2a2a2a;
+      color: #e0e0e0;
+      border: 1px solid #444;
     }
 
-    body.dark button:hover, body.dark select:hover {
-      background: #66b2ff;
+    body.dark button:hover,
+    body.dark select:hover {
+      background: #3a3a3a;
     }
   </style>
 </head>
@@ -136,7 +139,6 @@
     } else if(theme === "dark") {
       document.body.classList.add("dark");
     } else {
-      // device theme
       if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.body.classList.add("dark");
       } else {
@@ -173,7 +175,6 @@
     }
   });
 
-  // Apply saved or default theme on load
   loadTheme();
 
   window.logout = logout;
