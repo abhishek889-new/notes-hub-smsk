@@ -228,11 +228,14 @@
   const profilePic = document.getElementById("profile-pic");
   const profileMenu = document.getElementById("profile-menu");
 
-  function logout() {
-    signOut(auth).then(() => {
-      window.location.href = "login.html";
-    });
-  }
+  window.logout = function () {
+  signOut(auth).then(() => {
+    window.location.href = "login.html";
+  }).catch((error) => {
+    console.error("Error signing out:", error);
+  });
+};
+
 
   profilePic.addEventListener("click", () => {
     profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
