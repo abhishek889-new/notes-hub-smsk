@@ -147,68 +147,89 @@
 <body>
 
 <!-- Google profile picture container -->
-<div id="user-profile">
-  <img id="profile-pic" src="" alt="Profile Picture" />
-</div>
-
-<div class="background">
-  <div class="button-container">
-    <a href="https://samskruti.ac.in/engineering/" target="_blank">
-      <img src="logo.png" alt="Samskruti College Logo" class="logo">
-    </a>
-
-    <div class="college-name">Samskruti College of Engg. and Tech</div>
-
-    <div class="credit-strip">
-      <div class="moving-text">Created by: Manish Kain, Abhishek, Charan</div>
-    </div>
-
-    <h1>Welcome to Notes Hub</h1>
-    <p>Your one-stop destination for all semester-wise academic notes.</p>
-    <p>Select your year below to access the study materials:</p>
-
-    <button class="btn" onclick="location.href='first-year-notes.html'">First Year Notes</button>
-    <button class="btn" onclick="location.href='second-year-notes.html'">Second Year Notes</button>
-    <button class="btn" onclick="location.href='third-year-notes.html'">Third Year Notes</button>
-    <button class="btn" onclick="location.href='fourth-year-notes.html'">Fourth Year Notes</button>
+<div id="user-profile" style="position: absolute; top: 20px; right: 20px;">
+  <img id="profile-pic" src="" alt="Profile Picture"
+       style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;" 
+       onclick="toggleMenu()" />
+  <div id="profile-menu" style="
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: white;
+    color: black;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    width: 180px;
+    padding: 10px 0;
+    font-family: Arial, sans-serif;
+  ">
+    <button onclick="location.href='https://myaccount.google.com'" style="
+      width: 100%;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+    ">Manage your account</button>
+    <hr style="margin: 5px 0;">
+    <button onclick="logout()" style="
+      width: 100%;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+      color: red;
+    ">Log out</button>
   </div>
 </div>
 
 <script type="module">
+  // Firebase imports
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
+  //  Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
     authDomain: "college-homepage-template.firebaseapp.com",
     projectId: "college-homepage-template",
     storageBucket: "college-homepage-template.appspot.com",
     messagingSenderId: "306557815155",
-    appId: "1:306557815155:web:f805313ab13552af695d06"
+    appId: "1:306557815155:web:f805313ab13552af695d06",
+    measurementId: "G-F4D1V9BS6V"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
+  // Show profile picture if user is signed in
   onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-    } else {
-      const profilePic = document.getElementById("profile-pic");
-
-      // If Google profile photo is available
-      if (user.photoURL) {
-        profilePic.src = user.photoURL;
-      } else {
-        // Fallback default avatar (you can use any image here)
-        profilePic.src = "assets/images/default-avatar.png";  // Make sure this file exists in your project
-      }
-
+    const profilePic = document.getElementById("profile-pic");
+    if (user) {
+      profilePic.src = user.photoURL || "default-avatar.png";
       profilePic.style.display = "block";
+    } else {
+      profilePic.style.display = "none";
     }
   });
-</script>
+  
+  window.toggleMenu = function () {
+    const menu = document.getElementById("profile-menu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  };
 
+  window.logout = function () {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    });
+  };
+</script>
 
 </body>
 </html>
