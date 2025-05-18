@@ -219,5 +219,34 @@
       <button class="btn" onclick="location.href='fourth-year-notes.html'">Fourth Year Notes</button>
     </div>
   </div>
+
+<script type="module">
+  // Import Firebase functions (if not already imported)
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    appId: "YOUR_APP_ID"
+    // (other config if needed)
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const photoURL = user.photoURL;
+      if (photoURL) {
+        const profilePic = document.getElementById("profile-pic");
+        profilePic.src = photoURL;
+        profilePic.style.display = "block";
+      }
+    }
+  });
+</script>
+
 </body>
 </html>
