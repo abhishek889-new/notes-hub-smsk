@@ -143,8 +143,6 @@
       border-radius: 50%;
       display: none;
       cursor: pointer;
-      object-fit: cover;
-      background-color: #ccc;
     }
 
     #profile-menu {
@@ -155,7 +153,7 @@
       background-color: white;
       border: 1px solid #ccc;
       border-radius: 8px;
-      width: 180px;
+      width: 160px;
       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
       z-index: 5;
     }
@@ -169,7 +167,6 @@
       text-align: left;
       cursor: pointer;
       font-size: 14px;
-      color: #333;
     }
 
     #profile-menu button:hover {
@@ -183,8 +180,9 @@
 <div id="user-profile">
   <img id="profile-pic" src="" alt="Profile Picture" />
   <div id="profile-menu">
-    <button id="manage-account-btn">Manage your account</button>
-    <button id="logout-btn">Log out</button>
+    <!-- Changed Manage account link -->
+    <button onclick="window.location.href='profile.html'">Manage your account</button>
+    <button onclick="logout()">Log out</button>
   </div>
 </div>
 
@@ -230,52 +228,23 @@
 
   const profilePic = document.getElementById("profile-pic");
   const profileMenu = document.getElementById("profile-menu");
-  const manageBtn = document.getElementById("manage-account-btn");
-  const logoutBtn = document.getElementById("logout-btn");
 
-  // Toggle profile menu display
+  window.logout = function () {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    }).catch((error) => {
+      console.error("Error signing out:", error);
+    });
+  };
+
   profilePic.addEventListener("click", () => {
     profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
   });
 
-  // Hide menu if clicking outside
-  window.addEventListener("click", (e) => {
-    if (!profileMenu.contains(e.target) && e.target !== profilePic) {
-      profileMenu.style.display = "none";
-    }
-  });
-
-  // Log out handler
-  logoutBtn.addEventListener("click", () => {
-    signOut(auth).then(() => {
-      window.location.href = "login.html";
-    }).catch((error) => {
-      console.error("Sign out error:", error);
-    });
-  });
-
-  // Manage account handler: redirect based on login method
-  manageBtn.addEventListener("click", () => {
-    const user = auth.currentUser;
-    if (user) {
-      if (user.providerData.some(p => p.providerId === "google.com")) {
-        // Google signed in user: redirect to their Google Account page
-        window.open("https://myaccount.google.com/", "_blank");
-      } else {
-        // Non-Google users: redirect to Firebase generic account management or your own page
-        alert("Account management is not available for email/password users.");
-      }
-    }
-    profileMenu.style.display = "none";
-  });
-
-  // Monitor auth state
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      // Not logged in, redirect to login page
       window.location.href = "login.html";
     } else {
-      // Show profile pic if available, otherwise default avatar
       profilePic.src = user.photoURL || "assets/images/default-avatar.png";
       profilePic.style.display = "block";
     }
