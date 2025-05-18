@@ -1,67 +1,134 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Samskruti College</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #121212;
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
     }
+
     .container {
-      background: white;
+      background: #1e1e1e;
       padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      width: 300px;
-    }
-    input, button {
+      border-radius: 10px;
       width: 100%;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.7rem;
+      border: none;
+      border-radius: 5px;
+      margin-top: 0.5rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .toggle-btn {
+      background: #28a745;
+    }
+
     .social-login {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
       margin-top: 1rem;
+    }
+
+    .social-login button {
+      margin-top: 0.5rem;
+    }
+
+    #confirmPasswordGroup {
+      display: none;
+    }
+
+    .forgot {
+      text-align: right;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .forgot a {
+      color: #bbb;
+      text-decoration: none;
+    }
+
+    .forgot a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1>Login</h1>
-<input type="email" id="login-email" placeholder="Email" />
-<input type="password" id="login-password" placeholder="Password" />
-<button id="login-btn">Login</button>
-
-<h2>Or Sign Up</h2>
-<input type="email" id="signup-email" placeholder="Email" />
-<input type="password" id="signup-password" placeholder="Password" />
-<input type="password" id="signup-confirm-password" placeholder="Confirm Password" />
-<button id="signup-btn">Sign Up</button>
-
   <div class="container">
-    <h2>Login</h2>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Sign Up</button>
-    <button onclick="forgotPassword()">Forgot Password?</button>
+    <h2 id="formTitle">Login</h2>
+    <div class="form-group">
+      <input type="email" id="email" placeholder="Email" required />
+    </div>
+    <div class="form-group">
+      <input type="password" id="password" placeholder="Password" required />
+    </div>
+    <div class="form-group" id="confirmPasswordGroup">
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" />
+    </div>
+
+    <button onclick="handleAuth()">Login</button>
+    <div class="forgot">
+      <a href="#" onclick="resetPassword()">Forgot Password?</a>
+    </div>
+
+    <button class="toggle-btn" onclick="toggleForm()">Switch to Sign Up</button>
+
     <div class="social-login">
       <button onclick="googleSignIn()">Sign in with Google</button>
+      <button onclick="facebookSignIn()">Sign in with Facebook</button>
     </div>
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    // Firebase setup
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      sendPasswordResetEmail,
+      signInWithPopup,
+      GoogleAuthProvider,
+      FacebookAuthProvider
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
@@ -75,116 +142,72 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    const googleProvider = new GoogleAuthProvider();
+    const facebookProvider = new FacebookAuthProvider();
 
-    window.login = function () {
+    let isSignUp = false;
+
+    function toggleForm() {
+      isSignUp = !isSignUp;
+      document.getElementById("formTitle").innerText = isSignUp ? "Sign Up" : "Login";
+      document.querySelector("button[onclick='handleAuth()']").innerText = isSignUp ? "Sign Up" : "Login";
+      document.getElementById("confirmPasswordGroup").style.display = isSignUp ? "block" : "none";
+    }
+
+    window.handleAuth = async function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => window.location.href = "index.html")
-        .catch((error) => alert(error.message));
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (!email || !password) return alert("Please fill in all required fields.");
+
+      if (isSignUp) {
+        if (password !== confirmPassword) return alert("Passwords do not match!");
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+          window.location.href = "index.html";
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      } else {
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          window.location.href = "index.html";
+        } catch (error) {
+          alert("Login Failed: " + error.message);
+        }
+      }
     };
 
-    window.signup = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => window.location.href = "index.html")
-        .catch((error) => alert(error.message));
+    window.resetPassword = async function () {
+      const email = prompt("Enter your email to reset password:");
+      if (email) {
+        try {
+          await sendPasswordResetEmail(auth, email);
+          alert("Reset email sent!");
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      }
     };
 
-    window.forgotPassword = function () {
-      const email = document.getElementById("email").value;
-      sendPasswordResetEmail(auth, email)
-        .then(() => alert("Password reset email sent."))
-        .catch((error) => alert(error.message));
+    window.googleSignIn = async function () {
+      try {
+        await signInWithPopup(auth, googleProvider);
+        window.location.href = "index.html";
+      } catch (error) {
+        alert("Google Sign-in Error: " + error.message);
+      }
     };
 
-    window.googleSignIn = function () {
-      signInWithPopup(auth, provider)
-        .then(() => window.location.href = "index.html")
-        .catch((error) => alert(error.message));
+    window.facebookSignIn = async function () {
+      try {
+        await signInWithPopup(auth, facebookProvider);
+        window.location.href = "index.html";
+      } catch (error) {
+        alert("Facebook Sign-in Error: " + error.message);
+      }
     };
   </script>
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-  import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
-    authDomain: "college-homepage-template.firebaseapp.com",
-    projectId: "college-homepage-template",
-    storageBucket: "college-homepage-template.firebasestorage.app",
-    messagingSenderId: "306557815155",
-    appId: "1:306557815155:web:f805313ab13552af695d06"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  function validateEmail(email) {
-    return /\S+@\S+\.\S+/.test(email);
-  }
-
-  document.getElementById("signup-btn").addEventListener("click", () => {
-    const email = document.getElementById("signup-email").value.trim();
-    const password = document.getElementById("signup-password").value;
-    const confirmPassword = document.getElementById("signup-confirm-password").value;
-
-    if (!validateEmail(email)) {
-      alert("Enter a valid email.");
-      return;
-    }
-    if (password.length < 6) {
-      alert("Password must be at least 6 characters.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
-
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        alert("Signup successful!");
-        window.location.href = "index.html";
-      })
-      .catch((error) => {
-        alert("Signup error: " + error.message);
-      });
-  });
-
-  document.getElementById("login-btn").addEventListener("click", () => {
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value;
-
-    if (!validateEmail(email)) {
-      alert("Enter a valid email.");
-      return;
-    }
-
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        alert("Login successful!");
-        window.location.href = "index.html";
-      })
-      .catch((error) => {
-        alert("Login error: " + error.message);
-      });
-  });
-
-  // If user is already logged in, redirect to homepage
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      window.location.href = "index.html";
-    }
-  });
-</script>
-
 </body>
 </html>
