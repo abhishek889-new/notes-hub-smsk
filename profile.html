@@ -3,167 +3,179 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Profile - Notes Hub</title>
+  <title>Your Profile - Notes Hub</title>
   <style>
-    /* Theme colors */
-    :root {
-      --bg-color: #f9f9f9;
-      --text-color: #222;
-      --btn-bg: #007bff;
-      --btn-text: white;
-      --btn-hover-bg: #0056b3;
-      --logout-bg: crimson;
-      --logout-hover-bg: darkred;
-    }
-
-    [data-theme="dark"] {
-      --bg-color: #121212;
-      --text-color: #eee;
-      --btn-bg: #3399ff;
-      --btn-text: white;
-      --btn-hover-bg: #2672d4;
-      --logout-bg: #b22222;
-      --logout-hover-bg: #7a1212;
-    }
-
     body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      margin: 0; padding: 0;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
     }
-
-    .profile-container {
-      background-color: rgba(255, 255, 255, 0.85);
-      padding: 30px 40px;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    body.dark {
+      background: #121212;
+      color: #e0e0e0;
+    }
+    .profile-card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       text-align: center;
-      max-width: 400px;
+      max-width: 320px;
       width: 90%;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s, color 0.3s;
     }
-
-    [data-theme="dark"] .profile-container {
-      background-color: rgba(30, 30, 30, 0.85);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+    body.dark .profile-card {
+      background: #1e1e1e;
+      color: #e0e0e0;
+      box-shadow: 0 2px 10px rgba(255,255,255,0.1);
     }
-
-    .profile-pic {
-      width: 120px;
-      height: 120px;
+    img {
+      width: 100px; height: 100px;
       border-radius: 50%;
       object-fit: cover;
       margin-bottom: 20px;
-      border: 3px solid var(--btn-bg);
-      transition: border-color 0.3s ease;
     }
-
-    .profile-email {
-      font-size: 1.2rem;
-      margin-bottom: 30px;
-      word-break: break-all;
+    h2 {
+      margin: 0 0 10px;
     }
-
-    .btn {
-      display: inline-block;
-      padding: 12px 24px;
-      margin: 8px 10px 0 10px;
-      font-size: 1rem;
+    p {
+      margin: 5px 0;
+      color: #555;
+    }
+    body.dark p {
+      color: #bbb;
+    }
+    button, select {
+      margin-top: 20px;
+      padding: 10px 20px;
       border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      color: var(--btn-text);
-      background-color: var(--btn-bg);
-      user-select: none;
-    }
-    .btn:hover {
-      background-color: var(--btn-hover-bg);
-    }
-
-    .btn-logout {
-      background-color: var(--logout-bg);
+      background: #007bff;
       color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
     }
-    .btn-logout:hover {
-      background-color: var(--logout-hover-bg);
+    button:hover, select:hover {
+      background: #0056b3;
+    }
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: #007bff;
+      color: white;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-  <div class="profile-container">
-    <img id="user-photo" class="profile-pic" src="" alt="User Profile Picture" style="display:none;" />
-    <div id="user-email" class="profile-email">Loading user info...</div>
-    <button class="btn btn-theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
-    <button class="btn btn-logout" onclick="logout()">Logout</button>
+  <div class="profile-card">
+    <img id="profile-pic" src="" alt="Profile Picture" />
+    <h2 id="user-name">User Name</h2>
+    <p id="user-email">email@example.com</p>
+
+    <button onclick="logout()">Log Out</button>
+    <button onclick="goHome()">Back to Home</button>
+
+    <!-- Theme toggle dropdown -->
+    <select id="theme-select" aria-label="Select Theme">
+      <option value="device">Device Theme</option>
+      <option value="light">Light Theme</option>
+      <option value="dark">Dark Theme</option>
+    </select>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
-      authDomain: "college-homepage-template.firebaseapp.com",
-      projectId: "college-homepage-template",
-      storageBucket: "college-homepage-template.appspot.com",
-      messagingSenderId: "306557815155",
-      appId: "1:306557815155:web:f805313ab13552af695d06"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
+    authDomain: "college-homepage-template.firebaseapp.com",
+    projectId: "college-homepage-template",
+    storageBucket: "college-homepage-template.appspot.com",
+    messagingSenderId: "306557815155",
+    appId: "1:306557815155:web:f805313ab13552af695d06"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        const emailEl = document.getElementById("user-email");
-        const photoEl = document.getElementById("user-photo");
+  const profilePic = document.getElementById("profile-pic");
+  const userName = document.getElementById("user-name");
+  const userEmail = document.getElementById("user-email");
+  const themeSelect = document.getElementById("theme-select");
 
-        emailEl.textContent = user.email;
-        if (user.photoURL) {
-          photoEl.src = user.photoURL;
-          photoEl.style.display = "inline-block";
-        }
+  function applyTheme(theme) {
+    if(theme === "light") {
+      document.body.classList.remove("dark");
+    } else if(theme === "dark") {
+      document.body.classList.add("dark");
+    } else {
+      // device theme
+      document.body.classList.remove("dark");
+      if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.body.classList.add("dark");
+      }
+    }
+  }
+
+  // Load saved theme or default to device
+  const savedTheme = localStorage.getItem("theme") || "device";
+  themeSelect.value = savedTheme;
+  applyTheme(savedTheme);
+
+  // Listen to theme select change
+  themeSelect.addEventListener("change", (e) => {
+    const selected = e.target.value;
+    localStorage.setItem("theme", selected);
+    applyTheme(selected);
+  });
+
+  // Also listen to system theme changes if 'device' is selected
+  if(savedTheme === "device" && window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+      if(themeSelect.value === "device") {
+        applyTheme("device");
       }
     });
+  }
 
-    window.logout = function() {
-      signOut(auth).then(() => {
-        window.location.href = "login.html";
-      }).catch((error) => {
-        console.error("Logout error:", error);
-      });
-    };
-  </script>
-
-  <script>
-    // Theme management with localStorage persistence
-    function setTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-    }
-
-    function toggleTheme() {
-      const currentTheme = localStorage.getItem('theme') || 'light';
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      setTheme(newTheme);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      setTheme(savedTheme);
+  function logout() {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    }).catch(err => {
+      console.error("Logout error:", err);
     });
-  </script>
+  }
+
+  function goHome() {
+    window.location.href = "index.html";
+  }
+
+  onAuthStateChanged(auth, user => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+      userName.textContent = user.displayName || "User";
+      userEmail.textContent = user.email || "No Email";
+    }
+  });
+
+  window.logout = logout;
+  window.goHome = goHome;
+</script>
 
 </body>
 </html>
