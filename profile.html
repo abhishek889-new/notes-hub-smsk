@@ -15,11 +15,14 @@
       justify-content: center;
       height: 100vh;
       transition: background-color 0.3s, color 0.3s;
+      color: #121212;
     }
+
     body.dark {
       background: #121212;
       color: #e0e0e0;
     }
+
     .profile-card {
       background: white;
       padding: 30px;
@@ -29,28 +32,31 @@
       max-width: 320px;
       width: 90%;
       transition: background-color 0.3s, color 0.3s;
+      color: #121212;
     }
+
     body.dark .profile-card {
       background: #1e1e1e;
       color: #e0e0e0;
       box-shadow: 0 2px 10px rgba(255,255,255,0.1);
     }
+
     img {
       width: 100px; height: 100px;
       border-radius: 50%;
       object-fit: cover;
       margin-bottom: 20px;
     }
+
     h2 {
       margin: 0 0 10px;
     }
+
     p {
       margin: 5px 0;
-      color: #555;
+      color: inherit;
     }
-    body.dark p {
-      color: #bbb;
-    }
+
     button, select {
       margin-top: 20px;
       padding: 10px 20px;
@@ -60,20 +66,22 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s, color 0.3s;
+      width: 100%;
+      box-sizing: border-box;
     }
+
     button:hover, select:hover {
       background: #0056b3;
     }
-    select {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background-color: #007bff;
-      color: white;
-      width: 100%;
-      box-sizing: border-box;
-      margin-top: 10px;
+
+    body.dark button, body.dark select {
+      background: #3399ff;
+      color: #121212;
+    }
+
+    body.dark button:hover, body.dark select:hover {
+      background: #66b2ff;
     }
   </style>
 </head>
@@ -84,15 +92,14 @@
     <h2 id="user-name">User Name</h2>
     <p id="user-email">email@example.com</p>
 
-    <button onclick="logout()">Log Out</button>
-    <button onclick="goHome()">Back to Home</button>
-
-    <!-- Theme toggle dropdown -->
-    <select id="theme-select" aria-label="Select Theme">
-      <option value="device">Device Theme</option>
+    <select id="theme-toggle" aria-label="Toggle theme">
       <option value="light">Light Theme</option>
       <option value="dark">Dark Theme</option>
+      <option value="device">Device Theme</option>
     </select>
+
+    <button onclick="logout()">Log Out</button>
+    <button onclick="goHome()">Back to Home</button>
   </div>
 
 <script type="module">
@@ -114,7 +121,14 @@
   const profilePic = document.getElementById("profile-pic");
   const userName = document.getElementById("user-name");
   const userEmail = document.getElementById("user-email");
-  const themeSelect = document.getElementById("theme-select");
+  const themeToggle = document.getElementById("theme-toggle");
+
+  // Load theme from localStorage or default to device
+  function loadTheme() {
+    const savedTheme = localStorage.getItem("theme") || "device";
+    themeToggle.value = savedTheme;
+    applyTheme(savedTheme);
+  }
 
   function applyTheme(theme) {
     if(theme === "light") {
@@ -123,33 +137,19 @@
       document.body.classList.add("dark");
     } else {
       // device theme
-      document.body.classList.remove("dark");
-      if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
       }
     }
   }
 
-  // Load saved theme or default to device
-  const savedTheme = localStorage.getItem("theme") || "device";
-  themeSelect.value = savedTheme;
-  applyTheme(savedTheme);
-
-  // Listen to theme select change
-  themeSelect.addEventListener("change", (e) => {
-    const selected = e.target.value;
-    localStorage.setItem("theme", selected);
-    applyTheme(selected);
+  themeToggle.addEventListener("change", () => {
+    const selectedTheme = themeToggle.value;
+    localStorage.setItem("theme", selectedTheme);
+    applyTheme(selectedTheme);
   });
-
-  // Also listen to system theme changes if 'device' is selected
-  if(savedTheme === "device" && window.matchMedia) {
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
-      if(themeSelect.value === "device") {
-        applyTheme("device");
-      }
-    });
-  }
 
   function logout() {
     signOut(auth).then(() => {
@@ -172,6 +172,9 @@
       userEmail.textContent = user.email || "No Email";
     }
   });
+
+  // Apply saved or default theme on load
+  loadTheme();
 
   window.logout = logout;
   window.goHome = goHome;
