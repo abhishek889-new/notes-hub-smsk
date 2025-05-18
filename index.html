@@ -129,6 +129,7 @@
       .btn { width: 90%; margin: 10px auto; display: block; }
     }
 
+    /* Profile avatar and menu */
     #user-profile {
       position: absolute;
       top: 20px;
@@ -145,16 +146,16 @@
     }
 
     #profile-menu {
+      display: none;
       position: absolute;
       top: 60px;
       right: 0;
-      background: white;
+      background-color: white;
       border: 1px solid #ccc;
       border-radius: 8px;
-      box-shadow: 0px 2px 10px rgba(0,0,0,0.2);
-      display: none;
-      min-width: 150px;
-      z-index: 10;
+      width: 160px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 5;
     }
 
     #profile-menu button {
@@ -165,6 +166,7 @@
       border: none;
       text-align: left;
       cursor: pointer;
+      font-size: 14px;
     }
 
     #profile-menu button:hover {
@@ -174,12 +176,12 @@
 </head>
 <body>
 
-<!-- Google profile picture container -->
+<!-- Profile picture + dropdown -->
 <div id="user-profile">
   <img id="profile-pic" src="" alt="Profile Picture" />
   <div id="profile-menu">
-    <button onclick="alert('Manage account clicked')">Manage your account</button>
-    <button id="logout-btn">Log out</button>
+    <button onclick="window.location.href='https://myaccount.google.com'">Manage your account</button>
+    <button onclick="logout()">Log out</button>
   </div>
 </div>
 
@@ -206,6 +208,7 @@
   </div>
 </div>
 
+<!-- Firebase auth and profile menu toggle -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
@@ -224,29 +227,24 @@
 
   const profilePic = document.getElementById("profile-pic");
   const profileMenu = document.getElementById("profile-menu");
-  const logoutBtn = document.getElementById("logout-btn");
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
+  function logout() {
+    signOut(auth).then(() => {
       window.location.href = "login.html";
-    } else {
-      if (user.photoURL) {
-        profilePic.src = user.photoURL;
-      } else {
-        profilePic.src = "assets/images/default-avatar.png";
-      }
-      profilePic.style.display = "block";
-    }
-  });
+    });
+  }
 
   profilePic.addEventListener("click", () => {
     profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
   });
 
-  logoutBtn.addEventListener("click", () => {
-    signOut(auth).then(() => {
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
       window.location.href = "login.html";
-    });
+    } else {
+      profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+      profilePic.style.display = "block";
+    }
   });
 </script>
 
