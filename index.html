@@ -188,11 +188,10 @@
   </style>
 </head>
 <body>
-  <body>
-  <!-- Add this just below the opening body tag -->
-  <div id="user-profile" style="position: absolute; top: 20px; right: 20px;">
-    <img id="profile-pic" src="" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; display: none;" />
-  </div>
+<div id="user-profile" style="position: absolute; top: 20px; right: 20px;">
+<img id="profile-pic" src="" alt="Profile Picture" style="width: 50px; height: 50px; border-radius: 50%; display: none;" />
+</div>
+
 
   <div class="background">
     <div class="button-container">
@@ -221,32 +220,35 @@
   </div>
 
 <script type="module">
-  // Import Firebase functions (if not already imported)
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+  // Firebase imports
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
+  // Your Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
     authDomain: "college-homepage-template.firebaseapp.com",
     projectId: "college-homepage-template",
-    appId: "1:306557815155:web:f805313ab13552af695d06"
-    // (other config if needed)
+    storageBucket: "college-homepage-template.appspot.com",
+    messagingSenderId: "306557815155",
+    appId: "1:306557815155:web:f805313ab13552af695d06",
+    measurementId: "G-F4D1V9BS6V"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
+  // Show profile picture if user is signed in
   onAuthStateChanged(auth, (user) => {
-    if (user) {
-      const photoURL = user.photoURL;
-      if (photoURL) {
-        const profilePic = document.getElementById("profile-pic");
-        profilePic.src = photoURL;
-        profilePic.style.display = "block";
-      }
+    if (user && user.photoURL) {
+      const profilePic = document.getElementById("profile-pic");
+      profilePic.src = user.photoURL;
+      profilePic.style.display = "block";
     }
   });
 </script>
+
 
 </body>
 </html>
