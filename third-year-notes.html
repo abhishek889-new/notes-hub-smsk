@@ -1,37 +1,104 @@
-<!-- third-year.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Third Year Notes</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="theme-toggle.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Third Year Notes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2196F3;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        nav {
+            background-color: #333;
+            overflow: hidden;
+        }
+        nav a {
+            color: white;
+            float: left;
+            padding: 14px 20px;
+            text-align: center;
+            text-decoration: none;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .content {
+            padding: 20px;
+        }
+        .notes-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .notes-list li {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .notes-list li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        .notes-list li a:hover {
+            color: #2196F3;
+        }
+        footer {
+            text-align: center;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Third Year Notes</h1>
-    <button id="theme-toggle">Toggle Theme</button>
-  </header>
 
-  <main>
-    <section>
-      <h2>Semester 5</h2>
-      <ul>
-        <li><a href="notes/sem5/subject1.pdf">Subject 1</a></li>
-        <li><a href="notes/sem5/subject2.pdf">Subject 2</a></li>
-        <!-- Add more links here -->
-      </ul>
-    </section>
+    <!-- Header Section -->
+    <header>
+        <h1>Third Year Notes</h1>
+    </header>
 
-    <section>
-      <h2>Semester 6</h2>
-      <ul>
-        <li><a href="notes/sem6/subject1.pdf">Subject 1</a></li>
-        <li><a href="notes/sem6/subject2.pdf">Subject 2</a></li>
-        <!-- Add more links here -->
-      </ul>
-    </section>
-  </main>
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="first-year-notes.html">First Year</a>
+        <a href="second-year-notes.html">Second Year</a>
+        <a href="fourth-year-notes.html">Fourth Year</a>
+    </nav>
+
+    <!-- Main Content Section -->
+    <div class="content">
+        <h2>Resources for Third Year</h2>
+        <p>Click on a subject below to download or view the notes:</p>
+
+        <ul class="notes-list">
+            <li><a href="third-year-compiler.pdf" target="_blank">Compiler Design</a></li>
+            <li><a href="third-year-cn2.pdf" target="_blank">Advanced Computer Networks</a></li>
+            <li><a href="third-year-se.pdf" target="_blank">Software Engineering</a></li>
+            <li><a href="third-year-ai.pdf" target="_blank">Artificial Intelligence</a></li>
+            <li><a href="third-year-web.pdf" target="_blank">Web Technologies</a></li>
+        </ul>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2025 samskruti.ac.in | All rights reserved.</p>
+    </footer>
+
 </body>
 </html>
