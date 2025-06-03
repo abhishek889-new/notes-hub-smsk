@@ -2,110 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login | Notes Hub SMSK</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f6fa;
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
-
-    .container {
-      background: white;
-      padding: 30px 40px;
+    .login-container {
+      background: #fff;
+      padding: 2rem;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 400px;
     }
-
-    h2 {
+    .login-container h2 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 1rem;
     }
-
-    input, select {
+    .login-container input,
+    .login-container select,
+    .login-container button {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
-      box-sizing: border-box;
+      border-radius: 5px;
     }
-
-    button {
-      width: 100%;
-      padding: 10px;
+    .login-container input,
+    .login-container select {
+      border: 1px solid #ccc;
+    }
+    .login-container button {
       background: #007BFF;
       color: white;
       border: none;
-      margin-top: 10px;
       cursor: pointer;
-      border-radius: 5px;
     }
-
-    button:hover {
+    .login-container button:hover {
       background: #0056b3;
     }
-
-    .toggle, .forgot-password {
+    .toggle {
       text-align: center;
-      margin-top: 15px;
+      margin-top: 1rem;
     }
-
-    .toggle a, .forgot-password a {
+    .toggle a {
       color: #007BFF;
-      cursor: pointer;
       text-decoration: underline;
+      cursor: pointer;
     }
-
     .hidden {
       display: none;
+    }
+    .forgot {
+      text-align: right;
+    }
+    .forgot a {
+      font-size: 0.9em;
+      color: #007BFF;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-<div class="container">
+
+<div class="login-container">
   <h2 id="form-title">Login</h2>
-
-  <div id="form-area">
-    <select id="role-select">
-      <option value="student">Student</option>
-      <option value="faculty">Faculty</option>
-    </select>
-
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <input type="password" id="confirm-password" placeholder="Confirm Password" class="hidden">
-    <input type="text" id="faculty-key" placeholder="Faculty Access Key" class="hidden">
-
-    <button onclick="handleSubmit()" id="submit-btn">Login</button>
-    <button onclick="googleLogin()">Sign in with Google</button>
-
-    <div class="forgot-password">
-      <a onclick="resetPassword()">Forgot Password?</a>
-    </div>
-
-    <div class="toggle">
-      <span id="toggle-text">Don't have an account? <a onclick="toggleForm()">Sign Up</a></span>
-    </div>
+  <select id="role">
+    <option value="student">Student</option>
+    <option value="faculty">Faculty</option>
+  </select>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <input type="password" id="confirm-password" class="hidden" placeholder="Confirm Password">
+  <input type="text" id="faculty-key" class="hidden" placeholder="Faculty Access Key">
+  <div class="forgot"><a onclick="forgotPassword()">Forgot Password?</a></div>
+  <button onclick="handleSubmit()" id="submit-btn">Login</button>
+  <button onclick="googleLogin()">Sign in with Google</button>
+  <div class="toggle">
+    <span id="toggle-text">Don't have an account? <a onclick="toggleForm()">Sign Up</a></span>
   </div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
   import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signInWithRedirect,
-    getRedirectResult,
-    GoogleAuthProvider,
-    sendPasswordResetEmail
-  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    signInWithPopup,
+    sendPasswordResetEmail,
+    GoogleAuthProvider
+  } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
@@ -119,104 +116,90 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
+  const FACULTY_KEY = "smskfaculty2025";
 
-  const facultyAccessKey = "SECRET123";
   let isLogin = true;
 
-  const roleSelect = document.getElementById("role-select");
-  const facultyKeyField = document.getElementById("faculty-key");
+  const confirmPassword = document.getElementById("confirm-password");
+  const facultyKeyInput = document.getElementById("faculty-key");
 
-  roleSelect.addEventListener("change", () => {
-    if (roleSelect.value === "faculty") {
-      facultyKeyField.classList.remove("hidden");
+  document.getElementById("role").addEventListener("change", () => {
+    if (document.getElementById("role").value === "faculty") {
+      facultyKeyInput.classList.remove("hidden");
     } else {
-      facultyKeyField.classList.add("hidden");
+      facultyKeyInput.classList.add("hidden");
     }
   });
 
   window.toggleForm = function () {
     isLogin = !isLogin;
-    const title = document.getElementById("form-title");
-    const confirmPassword = document.getElementById("confirm-password");
-    const submitBtn = document.getElementById("submit-btn");
-    const toggleText = document.getElementById("toggle-text");
-
-    if (isLogin) {
-      title.innerText = "Login";
-      confirmPassword.classList.add("hidden");
-      submitBtn.innerText = "Login";
-      toggleText.innerHTML = `Don't have an account? <a onclick="toggleForm()">Sign Up</a>`;
-    } else {
-      title.innerText = "Sign Up";
-      confirmPassword.classList.remove("hidden");
-      submitBtn.innerText = "Sign Up";
-      toggleText.innerHTML = `Already have an account? <a onclick="toggleForm()">Login</a>`;
-    }
+    document.getElementById("form-title").innerText = isLogin ? "Login" : "Sign Up";
+    document.getElementById("submit-btn").innerText = isLogin ? "Login" : "Sign Up";
+    document.getElementById("toggle-text").innerHTML = isLogin
+      ? `Don't have an account? <a onclick="toggleForm()">Sign Up</a>`
+      : `Already have an account? <a onclick="toggleForm()">Login</a>`;
+    confirmPassword.classList.toggle("hidden", isLogin);
   };
 
   window.handleSubmit = function () {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirm-password").value;
-    const role = roleSelect.value;
-    const key = facultyKeyField.value.trim();
+    const confirm = confirmPassword.value;
+    const role = document.getElementById("role").value;
+    const key = facultyKeyInput.value.trim();
 
-    if (!email || !password || (!isLogin && !confirmPassword)) {
-      alert("Please fill all fields");
+    if (!email || !password || (!isLogin && !confirm)) {
+      alert("Please fill all required fields.");
       return;
     }
-
-    if (role === "faculty" && key !== facultyAccessKey) {
-      alert("Invalid Faculty Access Key");
+    if (!isLogin && password !== confirm) {
+      alert("Passwords do not match.");
       return;
     }
-
-    if (!isLogin && password !== confirmPassword) {
-      alert("Passwords do not match");
+    if (role === "faculty" && key !== FACULTY_KEY) {
+      alert("Invalid faculty access key.");
       return;
     }
 
     if (isLogin) {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-          window.location.href = "/notes-hub-smsk/index.html";
+          window.location.href = "index.html";
         })
-        .catch((error) => {
+        .catch(error => {
           alert("Login error: " + error.message);
         });
     } else {
       createUserWithEmailAndPassword(auth, email, password)
         .then(() => {
-          alert("Signup successful");
+          alert("Signup successful.");
           toggleForm();
         })
-        .catch((error) => {
+        .catch(error => {
           alert("Signup error: " + error.message);
         });
     }
   };
 
   window.googleLogin = function () {
-    const role = roleSelect.value;
-    const key = facultyKeyField.value.trim();
-    if (role === "faculty" && key !== facultyAccessKey) {
-      alert("Invalid Faculty Access Key.");
+    const role = document.getElementById("role").value;
+    const key = facultyKeyInput.value.trim();
+
+    if (role === "faculty" && key !== FACULTY_KEY) {
+      alert("Invalid faculty access key for Google login.");
       return;
     }
-    signInWithRedirect(auth, provider);
+
+    signInWithPopup(auth, provider)
+      .then(() => {
+        window.location.href = "index.html";
+      })
+      .catch((error) => {
+        alert("Google login error: " + error.message);
+      });
   };
 
-  getRedirectResult(auth)
-    .then((result) => {
-      if (result && result.user) {
-        window.location.href = "/notes-hub-smsk/index.html";
-      }
-    })
-    .catch((error) => {
-      alert("Google login error: " + error.message);
-    });
-
-  window.resetPassword = function () {
+  window.forgotPassword = function () {
     const email = document.getElementById("email").value.trim();
     if (!email) {
       alert("Please enter your email to reset password.");
@@ -231,5 +214,6 @@
       });
   };
 </script>
+
 </body>
 </html>
