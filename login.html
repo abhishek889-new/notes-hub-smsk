@@ -29,7 +29,7 @@
       margin-bottom: 20px;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
@@ -72,11 +72,14 @@
 <div class="container">
   <h2 id="form-title">Login</h2>
 
-  <!-- Common Form -->
   <div id="form-area">
     <input type="email" id="email" placeholder="Email" required>
     <input type="password" id="password" placeholder="Password" required>
     <input type="password" id="confirm-password" placeholder="Confirm Password" class="hidden">
+    <select id="role-select">
+      <option value="student">Student</option>
+      <option value="faculty">Faculty</option>
+    </select>
     <button onclick="handleSubmit()" id="submit-btn">Login</button>
     <button onclick="googleLogin()">Sign in with Google</button>
     <div class="toggle">
@@ -93,8 +96,15 @@
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signInWithPopup,
-    GoogleAuthProvider
+    GoogleAuthProvider,
+    signOut
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
@@ -107,6 +117,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
   let isLogin = true;
@@ -132,10 +143,11 @@
     }
   };
 
-  window.handleSubmit = function () {
+  window.handleSubmit = async function () {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirm-password").value;
+    const role = document.getElementById("role-select").value;
 
     if (!email || !password || (!isLogin && !confirmPassword)) {
       alert("Please fill all fields");
@@ -147,31 +159,50 @@
       return;
     }
 
-    if (isLogin) {
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          alert("Login successful");
-          window.location.href = "index.html";
-        })
-        .catch((error) => {
-          alert("Login error: " + error.message);
+    try {
+      if (isLogin) {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (!userDoc.exists()) {
+          alert("User role not found.");
+          await signOut(auth);
+          return;
+        }
+
+        const storedRole = userDoc.data().role;
+        if (storedRole !== role) {
+          alert("Incorrect role selected for this account.");
+          await signOut(auth);
+          return;
+        }
+
+        // Redirect based on role
+        if (storedRole === "faculty") {
+          window.location.href = "faculty-dashboard.html";
+        } else {
+          window.location.href = "student-dashboard.html";
+        }
+
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+        await setDoc(doc(db, "users", uid), {
+          email: email,
+          role: role
         });
-    } else {
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          alert("Signup successful");
-          toggleForm(); // Switch to login form after signup
-        })
-        .catch((error) => {
-          alert("Signup error: " + error.message);
-        });
+        alert("Signup successful! You can now log in.");
+        toggleForm();
+      }
+    } catch (error) {
+      alert((isLogin ? "Login" : "Signup") + " error: " + error.message);
     }
   };
 
   window.googleLogin = function () {
     signInWithPopup(auth, provider)
       .then(() => {
-        window.location.href = "index.html";
+        window.location.href = "index.html"; // Optional: redirect based on domain email?
       })
       .catch((error) => {
         alert("Google login error: " + error.message);
