@@ -256,13 +256,21 @@
       }
     }
 
-    signInWithPopup(auth, provider)
-      .then(() => {
-        window.location.href = "index.html";
-      })
-      .catch((error) => {
-        alert("Google login error: " + error.message);
-      });
+    signInWithRedirect(auth, provider);
+    import { getRedirectResult } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    getRedirectResult(auth)
+   .then((result) => {
+    if (result) {
+      const user = result.user;
+      // Optional: you can check user role or redirect here
+      window.location.href = "index.html";
+    }
+  })
+  .catch((error) => {
+    alert("Google login error: " + error.message);
+  });
+
   };
 
   window.forgotPassword = function () {
