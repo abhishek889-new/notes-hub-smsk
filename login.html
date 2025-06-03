@@ -5,62 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | College Portal</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f2f5;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
 
-    .container {
+    .login-container {
       background: #fff;
-      padding: 30px 40px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 400px;
+      max-width: 450px;
     }
 
-    .role-switch {
+    .tabs {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       margin-bottom: 20px;
     }
 
-    .role-button {
+    .tab {
       flex: 1;
+      text-align: center;
       padding: 10px;
       cursor: pointer;
-      background-color: #f0f0f0;
-      border: none;
-      border-radius: 25px 25px 0 0;
-      font-weight: bold;
-      transition: background-color 0.3s;
+      border-bottom: 2px solid transparent;
     }
 
-    .role-button.active {
-      background-color: #007BFF;
-      color: white;
+    .tab.active {
+      font-weight: bold;
+      border-color: #007BFF;
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
     }
 
     input {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      margin: 10px 0;
+      box-sizing: border-box;
     }
 
     button {
@@ -69,10 +61,8 @@
       background: #007BFF;
       color: white;
       border: none;
-      margin-top: 15px;
       cursor: pointer;
-      border-radius: 8px;
-      font-weight: bold;
+      border-radius: 5px;
     }
 
     button:hover {
@@ -81,7 +71,7 @@
 
     .toggle {
       text-align: center;
-      margin-top: 15px;
+      margin-top: 10px;
     }
 
     .toggle a {
@@ -93,58 +83,44 @@
     .hidden {
       display: none;
     }
-
-    .forgot-password {
-      text-align: right;
-      margin-top: 5px;
-    }
-
-    .forgot-password a {
-      font-size: 0.9em;
-      text-decoration: underline;
-      color: #007BFF;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="role-switch">
-    <button class="role-button active" id="facultyBtn" onclick="setRole('faculty')">Faculty</button>
-    <button class="role-button" id="studentBtn" onclick="setRole('student')">Student</button>
+<div class="login-container">
+  <div class="tabs">
+    <div class="tab active" id="student-tab" onclick="switchRole('student')">Student</div>
+    <div class="tab" id="faculty-tab" onclick="switchRole('faculty')">Faculty</div>
   </div>
 
   <h2 id="form-title">Login</h2>
 
-  <div id="form-area">
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <input type="password" id="confirm-password" placeholder="Confirm Password" class="hidden">
-    <input type="text" id="access-key" placeholder="Faculty Access Key" class="hidden">
-    
-    <div class="forgot-password">
-      <a onclick="forgotPassword()">Forgot Password?</a>
-    </div>
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="password" id="password" placeholder="Password" required />
+  <input type="password" id="confirm-password" placeholder="Confirm Password" class="hidden" />
+  <input type="text" id="faculty-key" placeholder="Faculty Access Key" class="hidden" />
 
-    <button onclick="handleSubmit()" id="submit-btn">Login</button>
-    <button onclick="googleLogin()">Sign in with Google</button>
+  <button onclick="handleSubmit()" id="submit-btn">Login</button>
+  <button onclick="googleLogin()">Sign in with Google</button>
 
-    <div class="toggle">
-      <span id="toggle-text">Don't have an account? <a onclick="toggleForm()">Sign Up</a></span>
-    </div>
+  <div class="toggle">
+    <span id="toggle-text">Don't have an account? <a onclick="toggleForm()">Sign Up</a></span>
+  </div>
+
+  <div class="toggle">
+    <a onclick="forgotPassword()">Forgot Password?</a>
   </div>
 </div>
 
-<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signInWithPopup,
     sendPasswordResetEmail,
+    signInWithRedirect,
+    getRedirectResult,
     GoogleAuthProvider
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
@@ -162,46 +138,42 @@
   const provider = new GoogleAuthProvider();
 
   let isLogin = true;
-  let selectedRole = "faculty";
-
-  const accessKeyRequired = "FACULTY123"; // Change this to your secure key
+  let currentRole = "student";
+  const facultyAccessKey = "FACULTY123"; // You can change this value
 
   window.toggleForm = function () {
     isLogin = !isLogin;
-    const title = document.getElementById("form-title");
-    const confirmPassword = document.getElementById("confirm-password");
-    const submitBtn = document.getElementById("submit-btn");
-    const toggleText = document.getElementById("toggle-text");
+    document.getElementById("form-title").innerText = isLogin ? "Login" : "Sign Up";
+    document.getElementById("submit-btn").innerText = isLogin ? "Login" : "Sign Up";
+    document.getElementById("toggle-text").innerHTML = isLogin
+      ? `Don't have an account? <a onclick="toggleForm()">Sign Up</a>`
+      : `Already have an account? <a onclick="toggleForm()">Login</a>`;
 
-    if (isLogin) {
-      title.innerText = "Login";
-      confirmPassword.classList.add("hidden");
-      submitBtn.innerText = "Login";
-      toggleText.innerHTML = `Don't have an account? <a onclick="toggleForm()">Sign Up</a>`;
+    updateVisibility();
+  };
+
+  window.switchRole = function (role) {
+    currentRole = role;
+    document.getElementById("student-tab").classList.toggle("active", role === "student");
+    document.getElementById("faculty-tab").classList.toggle("active", role === "faculty");
+
+    updateVisibility();
+  };
+
+  function updateVisibility() {
+    const confirmPassword = document.getElementById("confirm-password");
+    const facultyKey = document.getElementById("faculty-key");
+
+    if (currentRole === "faculty") {
+      facultyKey.classList.remove("hidden");
     } else {
-      title.innerText = "Sign Up";
-      confirmPassword.classList.remove("hidden");
-      submitBtn.innerText = "Sign Up";
-      toggleText.innerHTML = `Already have an account? <a onclick="toggleForm()">Login</a>`;
+      facultyKey.classList.add("hidden");
     }
 
-    updateAccessKeyField();
-  };
-
-  window.setRole = function (role) {
-    selectedRole = role;
-    document.getElementById("facultyBtn").classList.remove("active");
-    document.getElementById("studentBtn").classList.remove("active");
-    document.getElementById(role + "Btn").classList.add("active");
-    updateAccessKeyField();
-  };
-
-  function updateAccessKeyField() {
-    const accessKeyField = document.getElementById("access-key");
-    if (selectedRole === "faculty") {
-      accessKeyField.classList.remove("hidden");
+    if (isLogin) {
+      confirmPassword.classList.add("hidden");
     } else {
-      accessKeyField.classList.add("hidden");
+      confirmPassword.classList.remove("hidden");
     }
   }
 
@@ -209,27 +181,26 @@
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirm-password").value;
-    const accessKey = document.getElementById("access-key").value;
+    const key = document.getElementById("faculty-key").value.trim();
 
     if (!email || !password || (!isLogin && !confirmPassword)) {
-      alert("Please fill all required fields");
-      return;
-    }
-
-    if (selectedRole === "faculty" && accessKey !== accessKeyRequired) {
-      alert("Invalid Faculty Access Key");
+      alert("Please fill all fields.");
       return;
     }
 
     if (!isLogin && password !== confirmPassword) {
-      alert("Passwords do not match");
+      alert("Passwords do not match.");
+      return;
+    }
+
+    if (currentRole === "faculty" && key !== facultyAccessKey) {
+      alert("Invalid Faculty Access Key.");
       return;
     }
 
     if (isLogin) {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-          alert("Login successful");
           window.location.href = "index.html";
         })
         .catch((error) => {
@@ -239,7 +210,7 @@
       createUserWithEmailAndPassword(auth, email, password)
         .then(() => {
           alert("Signup successful");
-          toggleForm(); // Switch back to login
+          toggleForm();
         })
         .catch((error) => {
           alert("Signup error: " + error.message);
@@ -248,41 +219,38 @@
   };
 
   window.googleLogin = function () {
-    if (selectedRole === "faculty") {
-      const accessKey = prompt("Enter Faculty Access Key:");
-      if (accessKey !== accessKeyRequired) {
-        alert("Invalid Faculty Access Key");
+    if (currentRole === "faculty") {
+      const key = prompt("Enter Faculty Access Key:");
+      if (key !== facultyAccessKey) {
+        alert("Invalid Faculty Access Key.");
         return;
       }
     }
 
     signInWithRedirect(auth, provider);
-    import { getRedirectResult } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-
-    getRedirectResult(auth)
-   .then((result) => {
-    if (result) {
-      const user = result.user;
-      // Optional: you can check user role or redirect here
-      window.location.href = "index.html";
-    }
-  })
-  .catch((error) => {
-    alert("Google login error: " + error.message);
-  });
-
   };
 
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result) {
+        window.location.href = "index.html";
+      }
+    })
+    .catch((error) => {
+      alert("Google login error: " + error.message);
+    });
+
   window.forgotPassword = function () {
-    const email = prompt("Enter your email to receive reset instructions:");
-    if (!email) return;
-    sendPasswordResetEmail(auth, email)
-      .then(() => {
-        alert("Password reset link sent to your email.");
-      })
-      .catch((error) => {
-        alert("Error: " + error.message);
-      });
+    const email = prompt("Enter your email to reset password:");
+    if (email) {
+      sendPasswordResetEmail(auth, email)
+        .then(() => {
+          alert("Password reset email sent!");
+        })
+        .catch((error) => {
+          alert("Error: " + error.message);
+        });
+    }
   };
 </script>
 
