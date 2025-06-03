@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | College Portal</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #e6f0fa, #ffffff);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -17,34 +21,76 @@
 
     .container {
       background: white;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 400px;
+      text-align: center;
     }
 
     h2 {
-      text-align: center;
+      color: #007BFF;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .role-selection {
+      display: flex;
+      justify-content: space-between;
       margin-bottom: 20px;
     }
 
-    input, select {
+    .role-card {
+      width: 48%;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    .role-card.selected {
+      border-color: #007BFF;
+      background-color: #f0f8ff;
+    }
+
+    .role-card img {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 10px;
+    }
+
+    .role-card p {
+      margin: 0;
+      font-weight: bold;
+    }
+
+    .greeting {
+      font-size: 14px;
+      margin: 10px 0 20px;
+      color: #555;
+    }
+
+    input {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      box-sizing: border-box;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
     }
 
     button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       background: #007BFF;
       color: white;
       border: none;
-      margin-top: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      margin-top: 12px;
       cursor: pointer;
-      border-radius: 5px;
     }
 
     button:hover {
@@ -52,51 +98,54 @@
     }
 
     .toggle {
-      text-align: center;
-      margin-top: 20px;
+      margin-top: 15px;
+      font-size: 14px;
     }
 
     .toggle a {
       color: #007BFF;
       cursor: pointer;
-      text-decoration: underline;
+      text-decoration: none;
+      font-weight: bold;
     }
 
-    .hidden {
+    #confirm-password {
       display: none;
     }
   </style>
 </head>
 <body>
-
 <div class="container">
-  <h2 id="form-title">Login</h2>
-
-  <div id="form-area">
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <input type="password" id="confirm-password" placeholder="Confirm Password" class="hidden">
-    <select id="role-select">
-      <option value="student">Student</option>
-      <option value="faculty">Faculty</option>
-    </select>
-    <button onclick="handleSubmit()" id="submit-btn">Login</button>
-    <button onclick="googleLogin()">Sign in with Google</button>
-    <div class="toggle">
-      <span id="toggle-text">Don't have an account? <a onclick="toggleForm()">Sign Up</a></span>
+  <h2>Choose Account Type</h2>
+  <div class="role-selection">
+    <div class="role-card" id="facultyCard" onclick="selectRole('faculty')">
+      <img src="https://img.icons8.com/ios-filled/100/doctor-male.png" alt="Faculty">
+      <p>Faculty</p>
     </div>
+    <div class="role-card" id="studentCard" onclick="selectRole('student')">
+      <img src="https://img.icons8.com/ios-filled/100/student-male.png" alt="Student">
+      <p>Student</p>
+    </div>
+  </div>
+  <div class="greeting" id="greetingText">Hello! Please fill out the form below to get started.</div>
+
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <input type="password" id="confirm-password" placeholder="Confirm Password">
+
+  <button onclick="handleSubmit()" id="submit-btn">Login</button>
+  <div class="toggle">
+    <span id="toggle-text">No account? <a onclick="toggleForm()">Signup</a></span>
   </div>
 </div>
 
-<!-- Firebase SDK -->
+<!-- Firebase Auth + Firestore -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signInWithPopup,
-    GoogleAuthProvider,
     signOut
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
   import {
@@ -118,44 +167,44 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
 
   let isLogin = true;
+  let selectedRole = null;
+
+  window.selectRole = function(role) {
+    selectedRole = role;
+    document.getElementById('facultyCard').classList.remove('selected');
+    document.getElementById('studentCard').classList.remove('selected');
+    document.getElementById(role + 'Card').classList.add('selected');
+    document.getElementById('greetingText').innerText = `Hello ${role}! Please fill out the form below to get started.`;
+  };
 
   window.toggleForm = function () {
     isLogin = !isLogin;
-
-    const title = document.getElementById("form-title");
-    const confirmPassword = document.getElementById("confirm-password");
-    const submitBtn = document.getElementById("submit-btn");
-    const toggleText = document.getElementById("toggle-text");
-
-    if (isLogin) {
-      title.innerText = "Login";
-      confirmPassword.classList.add("hidden");
-      submitBtn.innerText = "Login";
-      toggleText.innerHTML = `Don't have an account? <a onclick="toggleForm()">Sign Up</a>`;
-    } else {
-      title.innerText = "Sign Up";
-      confirmPassword.classList.remove("hidden");
-      submitBtn.innerText = "Sign Up";
-      toggleText.innerHTML = `Already have an account? <a onclick="toggleForm()">Login</a>`;
-    }
+    document.getElementById("confirm-password").style.display = isLogin ? "none" : "block";
+    document.getElementById("submit-btn").innerText = isLogin ? "Login" : "Sign Up";
+    document.getElementById("toggle-text").innerHTML = isLogin
+      ? `No account? <a onclick="toggleForm()">Signup</a>`
+      : `Already have an account? <a onclick="toggleForm()">Login</a>`;
   };
 
   window.handleSubmit = async function () {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirm-password").value;
-    const role = document.getElementById("role-select").value;
+
+    if (!selectedRole) {
+      alert("Please select a role (Faculty or Student).");
+      return;
+    }
 
     if (!email || !password || (!isLogin && !confirmPassword)) {
-      alert("Please fill all fields");
+      alert("Please fill all fields.");
       return;
     }
 
     if (!isLogin && password !== confirmPassword) {
-      alert("Passwords do not match");
+      alert("Passwords do not match.");
       return;
     }
 
@@ -164,6 +213,7 @@
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
         const userDoc = await getDoc(doc(db, "users", uid));
+
         if (!userDoc.exists()) {
           alert("User role not found.");
           await signOut(auth);
@@ -171,25 +221,20 @@
         }
 
         const storedRole = userDoc.data().role;
-        if (storedRole !== role) {
+        if (storedRole !== selectedRole) {
           alert("Incorrect role selected for this account.");
           await signOut(auth);
           return;
         }
 
-        // Redirect based on role
-        if (storedRole === "faculty") {
-          window.location.href = "faculty-dashboard.html";
-        } else {
-          window.location.href = "student-dashboard.html";
-        }
+        window.location.href = storedRole === "faculty" ? "faculty-dashboard.html" : "student-dashboard.html";
 
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
         await setDoc(doc(db, "users", uid), {
-          email: email,
-          role: role
+          email,
+          role: selectedRole
         });
         alert("Signup successful! You can now log in.");
         toggleForm();
@@ -197,16 +242,6 @@
     } catch (error) {
       alert((isLogin ? "Login" : "Signup") + " error: " + error.message);
     }
-  };
-
-  window.googleLogin = function () {
-    signInWithPopup(auth, provider)
-      .then(() => {
-        window.location.href = "index.html"; // Optional: redirect based on domain email?
-      })
-      .catch((error) => {
-        alert("Google login error: " + error.message);
-      });
   };
 </script>
 
