@@ -138,7 +138,7 @@
 
   let isLogin = true;
   let selectedRole = null;
-  const facultyKeyPassword = "FACULTY123"; // Change this to your real access key
+  const facultyKeyPassword = "FACULTY123"; // Change this to your secure key
 
   window.selectRole = function(role) {
     selectedRole = role;
@@ -146,8 +146,8 @@
     document.getElementById('studentCard').classList.remove('selected');
     document.getElementById(role + 'Card').classList.add('selected');
 
-    // Show key if signup + faculty selected
-    const showKey = !isLogin && role === "faculty";
+    // Show/hide access key input based on role and form mode
+    const showKey = selectedRole === "faculty";
     document.getElementById("faculty-key").style.display = showKey ? "block" : "none";
   };
 
@@ -171,8 +171,9 @@
       toggleText.innerHTML = `Already have an account? <a onclick="toggleForm()">Login</a>`;
     }
 
-    // Update faculty key visibility
-    document.getElementById("faculty-key").style.display = !isLogin && selectedRole === "faculty" ? "block" : "none";
+    // Update key visibility
+    const showKey = selectedRole === "faculty";
+    document.getElementById("faculty-key").style.display = showKey ? "block" : "none";
   };
 
   window.handleSubmit = function () {
@@ -196,8 +197,8 @@
       return;
     }
 
-    if (!isLogin && selectedRole === "faculty" && facultyKey !== facultyKeyPassword) {
-      alert("Incorrect Faculty Access Key");
+    if (selectedRole === "faculty" && facultyKey !== facultyKeyPassword) {
+      alert("Invalid Faculty Access Key");
       return;
     }
 
@@ -214,12 +215,12 @@
       createUserWithEmailAndPassword(auth, email, password)
         .then(() => {
           alert("Signup successful");
-          toggleForm(); // Switch to login form after signup
+          toggleForm(); // Switch to login form
         })
         .catch((error) => {
           if (error.code === 'auth/email-already-in-use') {
-            alert("This email is already registered. Please log in instead.");
-            toggleForm(); // Switch to login
+            alert("Email already registered. Please login.");
+            toggleForm();
           } else {
             alert("Signup error: " + error.message);
           }
