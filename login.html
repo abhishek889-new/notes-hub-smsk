@@ -132,6 +132,8 @@
   <input type="email" id="email" placeholder="Email" required>
   <input type="password" id="password" placeholder="Password" required>
   <input type="password" id="confirm-password" placeholder="Confirm Password">
+  <input type="password" id="faculty-key" placeholder="Faculty Access Key" style="display:none;">
+
 
   <button onclick="handleSubmit()" id="submit-btn">Login</button>
   <div class="toggle">
@@ -170,6 +172,7 @@
 
   let isLogin = true;
   let selectedRole = null;
+  const facultyKeyPassword = "roundcurtains1234"; // Faculty login password!
 
   window.selectRole = function(role) {
     selectedRole = role;
@@ -244,6 +247,7 @@
     }
   };
 </script>
+  
 
 </body>
 </html>
