@@ -3,52 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login | College Portal</title>
+  <title>Login | Notes Hub SMSK</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       background: #f4f4f4;
-      margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
 
-    .login-container {
-      background: #fff;
-      padding: 30px;
+    .container {
+      background: white;
+      padding: 30px 40px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 450px;
-    }
-
-    .tabs {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-    }
-
-    .tab.active {
-      font-weight: bold;
-      border-color: #007BFF;
+      max-width: 400px;
     }
 
     h2 {
       text-align: center;
+      margin-bottom: 20px;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
@@ -61,6 +42,7 @@
       background: #007BFF;
       color: white;
       border: none;
+      margin-top: 10px;
       cursor: pointer;
       border-radius: 5px;
     }
@@ -69,12 +51,12 @@
       background: #0056b3;
     }
 
-    .toggle {
+    .toggle, .forgot-password {
       text-align: center;
-      margin-top: 10px;
+      margin-top: 15px;
     }
 
-    .toggle a {
+    .toggle a, .forgot-password a {
       color: #007BFF;
       cursor: pointer;
       text-decoration: underline;
@@ -86,29 +68,30 @@
   </style>
 </head>
 <body>
-
-<div class="login-container">
-  <div class="tabs">
-    <div class="tab active" id="student-tab" onclick="switchRole('student')">Student</div>
-    <div class="tab" id="faculty-tab" onclick="switchRole('faculty')">Faculty</div>
-  </div>
-
+<div class="container">
   <h2 id="form-title">Login</h2>
 
-  <input type="email" id="email" placeholder="Email" required />
-  <input type="password" id="password" placeholder="Password" required />
-  <input type="password" id="confirm-password" placeholder="Confirm Password" class="hidden" />
-  <input type="text" id="faculty-key" placeholder="Faculty Access Key" class="hidden" />
+  <div id="form-area">
+    <select id="role-select">
+      <option value="student">Student</option>
+      <option value="faculty">Faculty</option>
+    </select>
 
-  <button onclick="handleSubmit()" id="submit-btn">Login</button>
-  <button onclick="googleLogin()">Sign in with Google</button>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <input type="password" id="confirm-password" placeholder="Confirm Password" class="hidden">
+    <input type="text" id="faculty-key" placeholder="Faculty Access Key" class="hidden">
 
-  <div class="toggle">
-    <span id="toggle-text">Don't have an account? <a onclick="toggleForm()">Sign Up</a></span>
-  </div>
+    <button onclick="handleSubmit()" id="submit-btn">Login</button>
+    <button onclick="googleLogin()">Sign in with Google</button>
 
-  <div class="toggle">
-    <a onclick="forgotPassword()">Forgot Password?</a>
+    <div class="forgot-password">
+      <a onclick="resetPassword()">Forgot Password?</a>
+    </div>
+
+    <div class="toggle">
+      <span id="toggle-text">Don't have an account? <a onclick="toggleForm()">Sign Up</a></span>
+    </div>
   </div>
 </div>
 
@@ -118,10 +101,10 @@
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    sendPasswordResetEmail,
     signInWithRedirect,
     getRedirectResult,
-    GoogleAuthProvider
+    GoogleAuthProvider,
+    sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
   const firebaseConfig = {
@@ -137,71 +120,66 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
+  const facultyAccessKey = "SECRET123";
   let isLogin = true;
-  let currentRole = "student";
-  const facultyAccessKey = "FACULTY123"; // You can change this value
+
+  const roleSelect = document.getElementById("role-select");
+  const facultyKeyField = document.getElementById("faculty-key");
+
+  roleSelect.addEventListener("change", () => {
+    if (roleSelect.value === "faculty") {
+      facultyKeyField.classList.remove("hidden");
+    } else {
+      facultyKeyField.classList.add("hidden");
+    }
+  });
 
   window.toggleForm = function () {
     isLogin = !isLogin;
-    document.getElementById("form-title").innerText = isLogin ? "Login" : "Sign Up";
-    document.getElementById("submit-btn").innerText = isLogin ? "Login" : "Sign Up";
-    document.getElementById("toggle-text").innerHTML = isLogin
-      ? `Don't have an account? <a onclick="toggleForm()">Sign Up</a>`
-      : `Already have an account? <a onclick="toggleForm()">Login</a>`;
-
-    updateVisibility();
-  };
-
-  window.switchRole = function (role) {
-    currentRole = role;
-    document.getElementById("student-tab").classList.toggle("active", role === "student");
-    document.getElementById("faculty-tab").classList.toggle("active", role === "faculty");
-
-    updateVisibility();
-  };
-
-  function updateVisibility() {
+    const title = document.getElementById("form-title");
     const confirmPassword = document.getElementById("confirm-password");
-    const facultyKey = document.getElementById("faculty-key");
-
-    if (currentRole === "faculty") {
-      facultyKey.classList.remove("hidden");
-    } else {
-      facultyKey.classList.add("hidden");
-    }
+    const submitBtn = document.getElementById("submit-btn");
+    const toggleText = document.getElementById("toggle-text");
 
     if (isLogin) {
+      title.innerText = "Login";
       confirmPassword.classList.add("hidden");
+      submitBtn.innerText = "Login";
+      toggleText.innerHTML = `Don't have an account? <a onclick="toggleForm()">Sign Up</a>`;
     } else {
+      title.innerText = "Sign Up";
       confirmPassword.classList.remove("hidden");
+      submitBtn.innerText = "Sign Up";
+      toggleText.innerHTML = `Already have an account? <a onclick="toggleForm()">Login</a>`;
     }
-  }
+  };
 
   window.handleSubmit = function () {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirm-password").value;
-    const key = document.getElementById("faculty-key").value.trim();
+    const role = roleSelect.value;
+    const key = facultyKeyField.value.trim();
 
     if (!email || !password || (!isLogin && !confirmPassword)) {
-      alert("Please fill all fields.");
+      alert("Please fill all fields");
+      return;
+    }
+
+    if (role === "faculty" && key !== facultyAccessKey) {
+      alert("Invalid Faculty Access Key");
       return;
     }
 
     if (!isLogin && password !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
-
-    if (currentRole === "faculty" && key !== facultyAccessKey) {
-      alert("Invalid Faculty Access Key.");
+      alert("Passwords do not match");
       return;
     }
 
     if (isLogin) {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-          window.location.href = "index.html";
+          window.location.href = "/notes-hub-smsk/index.html";
         })
         .catch((error) => {
           alert("Login error: " + error.message);
@@ -219,40 +197,39 @@
   };
 
   window.googleLogin = function () {
-    if (currentRole === "faculty") {
-      const key = prompt("Enter Faculty Access Key:");
-      if (key !== facultyAccessKey) {
-        alert("Invalid Faculty Access Key.");
-        return;
-      }
+    const role = roleSelect.value;
+    const key = facultyKeyField.value.trim();
+    if (role === "faculty" && key !== facultyAccessKey) {
+      alert("Invalid Faculty Access Key.");
+      return;
     }
-
     signInWithRedirect(auth, provider);
   };
 
   getRedirectResult(auth)
     .then((result) => {
-      if (result) {
-        window.location.href = "index.html";
+      if (result && result.user) {
+        window.location.href = "/notes-hub-smsk/index.html";
       }
     })
     .catch((error) => {
       alert("Google login error: " + error.message);
     });
 
-  window.forgotPassword = function () {
-    const email = prompt("Enter your email to reset password:");
-    if (email) {
-      sendPasswordResetEmail(auth, email)
-        .then(() => {
-          alert("Password reset email sent!");
-        })
-        .catch((error) => {
-          alert("Error: " + error.message);
-        });
+  window.resetPassword = function () {
+    const email = document.getElementById("email").value.trim();
+    if (!email) {
+      alert("Please enter your email to reset password.");
+      return;
     }
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert("Password reset email sent.");
+      })
+      .catch((error) => {
+        alert("Error sending reset email: " + error.message);
+      });
   };
 </script>
-
 </body>
 </html>
