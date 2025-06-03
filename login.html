@@ -183,22 +183,15 @@
 
   window.googleLogin = function () {
     const role = document.getElementById("role").value;
+    const key = facultyKeyInput.value.trim();
 
-    // Optional: early check if faculty key is empty
-    if (role === "faculty" && facultyKeyInput.value.trim() === "") {
-      alert("Please enter faculty access key.");
+    if (role === "faculty" && key !== FACULTY_KEY) {
+      alert("Invalid faculty access key for Google login.");
       return;
     }
 
     signInWithPopup(auth, provider)
       .then(() => {
-        if (role === "faculty") {
-          const key = facultyKeyInput.value.trim();
-          if (key !== FACULTY_KEY) {
-            alert("Invalid faculty access key for Google login.");
-            return;
-          }
-        }
         window.location.href = "index.html";
       })
       .catch((error) => {
