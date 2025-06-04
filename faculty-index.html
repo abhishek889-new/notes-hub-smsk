@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Notes Hub - Faculty Home</title>
   <style>
-    /* Your existing CSS styles here (same as before) */
+    /* Same styles as your faculty index earlier */
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: Arial, sans-serif;
     }
-
     .background {
       position: relative;
       background-image: url('background.jpg');
@@ -20,7 +19,6 @@
       background-position: center;
       height: 100vh;
     }
-
     .background::before {
       content: '';
       position: absolute;
@@ -29,7 +27,6 @@
       background-color: rgba(0, 0, 0, 0.6);
       z-index: 1;
     }
-
     .button-container {
       position: relative;
       z-index: 2;
@@ -39,13 +36,11 @@
       max-width: 700px;
       margin: auto;
     }
-
     .logo {
       display: block;
       margin: 20px auto;
       max-width: 150px;
     }
-
     .college-name {
       font-size: 20px;
       font-weight: bold;
@@ -53,13 +48,11 @@
       margin-bottom: 10px;
       text-transform: uppercase;
     }
-
     .credit-strip {
       width: 100%;
       overflow: hidden;
       margin-bottom: 20px;
     }
-
     .moving-text {
       white-space: nowrap;
       display: inline-block;
@@ -67,29 +60,24 @@
       color: #ffdf6c;
       animation: slideText 12s linear infinite;
     }
-
     .moving-text:hover {
       animation-play-state: paused;
     }
-
     @keyframes slideText {
       0% { transform: translateX(100%); }
       100% { transform: translateX(-100%); }
     }
-
     .button-container h1 {
       font-size: 42px;
       margin-bottom: 10px;
       animation: fadeInDown 1s ease-out;
     }
-
     .button-container p {
       font-size: 18px;
       margin: 8px 0;
       color: #f0f0f0;
       animation: fadeInUp 1.5s ease-out;
     }
-
     .btn {
       font-size: 18px;
       padding: 12px 24px;
@@ -102,42 +90,34 @@
       transition: all 0.3s ease-in-out;
       animation: fadeIn 2s ease-out;
     }
-
     .btn:hover {
       background-color: white;
       color: black;
       transform: scale(1.05);
       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
     }
-
     @keyframes fadeInDown {
       from { opacity: 0; transform: translateY(-20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes fadeIn {
       from { opacity: 0; }
       to   { opacity: 1; }
     }
-
     @media (max-width: 600px) {
       .button-container h1 { font-size: 30px; }
       .btn { width: 90%; margin: 10px auto; display: block; }
     }
-
-    /* Profile avatar and menu */
     #user-profile {
       position: absolute;
       top: 20px;
       right: 20px;
       z-index: 3;
     }
-
     #profile-pic {
       width: 50px;
       height: 50px;
@@ -145,7 +125,6 @@
       display: none;
       cursor: pointer;
     }
-
     #profile-menu {
       display: none;
       position: absolute;
@@ -158,7 +137,6 @@
       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
       z-index: 5;
     }
-
     #profile-menu button {
       display: block;
       width: 100%;
@@ -169,7 +147,6 @@
       cursor: pointer;
       font-size: 14px;
     }
-
     #profile-menu button:hover {
       background-color: #f0f0f0;
     }
@@ -177,7 +154,6 @@
 </head>
 <body>
 
-<!-- Profile picture + dropdown -->
 <div id="user-profile">
   <img id="profile-pic" src="" alt="Profile Picture" />
   <div id="profile-menu">
@@ -191,16 +167,12 @@
     <a href="https://samskruti.ac.in/engineering/" target="_blank">
       <img src="logo.png" alt="Samskruti College Logo" class="logo" />
     </a>
-
     <div class="college-name">Samskruti College of Engg. and Tech</div>
-
     <div class="credit-strip">
       <div class="moving-text">Created by: Manish Kain, Abhishek, Charan</div>
     </div>
-
-    <h1>Welcome, Faculty Member</h1>
-    <p>This is your dashboard for managing notes and student submissions.</p>
-
+    <h1>Welcome Faculty</h1>
+    <p>This is your dashboard. Manage and upload notes here.</p>
     <button class="btn" onclick="location.href='upload-notes.html'">Upload Notes</button>
     <button class="btn" onclick="location.href='view-submissions.html'">View Submissions</button>
   </div>
@@ -229,7 +201,9 @@
     signOut(auth).then(() => {
       localStorage.removeItem('userRole');
       window.location.href = "login.html";
-    }).catch(console.error);
+    }).catch((error) => {
+      console.error("Error signing out:", error);
+    });
   };
 
   profilePic.addEventListener("click", () => {
@@ -243,24 +217,25 @@
       return;
     }
 
-    profilePic.src = user.photoURL || "assets/images/default-avatar.png";
-    profilePic.style.display = "block";
-
     const role = localStorage.getItem('userRole');
 
     if (!role) {
-      alert("User role missing. Please login again.");
       signOut(auth).then(() => {
         window.location.href = "login.html";
       });
       return;
     }
 
+    // Faculty should be on this page
     if (role !== 'faculty') {
-      // If logged in user is not faculty but opened faculty page, redirect to student home
+      // Redirect non-faculty users to main index
       window.location.href = "index.html";
       return;
     }
+
+    // Show profile pic
+    profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+    profilePic.style.display = "block";
   });
 </script>
 
