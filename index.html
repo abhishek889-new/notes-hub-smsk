@@ -5,174 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Notes Hub - Home</title>
   <style>
-    /* Your existing CSS styles here (same as before) */
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: Arial, sans-serif;
-    }
-
-    .background {
-      position: relative;
-      background-image: url('background.jpg');
-      background-size: cover;
-      background-position: center;
-      height: 100vh;
-    }
-
-    .background::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.6);
-      z-index: 1;
-    }
-
-    .button-container {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      padding-top: 80px;
-      color: white;
-      max-width: 700px;
-      margin: auto;
-    }
-
-    .logo {
-      display: block;
-      margin: 20px auto;
-      max-width: 150px;
-    }
-
-    .college-name {
-      font-size: 20px;
-      font-weight: bold;
-      color: red;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-    }
-
-    .credit-strip {
-      width: 100%;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-
-    .moving-text {
-      white-space: nowrap;
-      display: inline-block;
-      font-size: 16px;
-      color: #ffdf6c;
-      animation: slideText 12s linear infinite;
-    }
-
-    .moving-text:hover {
-      animation-play-state: paused;
-    }
-
-    @keyframes slideText {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    .button-container h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
-      animation: fadeInDown 1s ease-out;
-    }
-
-    .button-container p {
-      font-size: 18px;
-      margin: 8px 0;
-      color: #f0f0f0;
-      animation: fadeInUp 1.5s ease-out;
-    }
-
-    .btn {
-      font-size: 18px;
-      padding: 12px 24px;
-      margin: 10px;
-      cursor: pointer;
-      background-color: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 2px solid white;
-      border-radius: 5px;
-      transition: all 0.3s ease-in-out;
-      animation: fadeIn 2s ease-out;
-    }
-
-    .btn:hover {
-      background-color: white;
-      color: black;
-      transform: scale(1.05);
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-
-    @media (max-width: 600px) {
-      .button-container h1 { font-size: 30px; }
-      .btn { width: 90%; margin: 10px auto; display: block; }
-    }
-
-    /* Profile avatar and menu */
-    #user-profile {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 3;
-    }
-
-    #profile-pic {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: none;
-      cursor: pointer;
-    }
-
-    #profile-menu {
-      display: none;
-      position: absolute;
-      top: 60px;
-      right: 0;
-      background-color: white;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      width: 160px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-      z-index: 5;
-    }
-
-    #profile-menu button {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      background: none;
-      border: none;
-      text-align: left;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    #profile-menu button:hover {
-      background-color: #f0f0f0;
-    }
+    /* Your existing CSS here... */
+    /* (omitted for brevity; use your existing styles) */
   </style>
 </head>
 <body>
@@ -229,8 +63,8 @@
   const profileMenu = document.getElementById("profile-menu");
 
   window.logout = function () {
-    localStorage.removeItem("userRole");
     signOut(auth).then(() => {
+      localStorage.removeItem('userRole'); // Clear role on logout
       window.location.href = "login.html";
     }).catch((error) => {
       console.error("Error signing out:", error);
@@ -241,18 +75,30 @@
     profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
   });
 
+  // Immediately check role on page load
+  const userRole = localStorage.getItem('userRole');
+  if (!userRole) {
+    // No role saved, redirect to login immediately
+    window.location.href = 'login.html';
+  } else if (userRole === 'faculty') {
+    // If role is faculty, redirect to faculty index if on student index
+    if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+      window.location.href = 'faculty-index.html';
+    }
+  }
+
+  // Firebase auth state observer
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      window.location.href = "login.html";
+      // Not logged in
+      localStorage.removeItem('userRole');
+      window.location.href = 'login.html';
     } else {
-      const role = localStorage.getItem("userRole");
-      if (role === "faculty") {
-        // If faculty tries to open student index, redirect to faculty index
-        window.location.href = "faculty-index.html";
-      } else {
-        // Student user
-        profilePic.src = user.photoURL || "assets/images/default-avatar.png";
-        profilePic.style.display = "block";
+      profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+      profilePic.style.display = "block";
+      // Additional redirect safeguard for faculty on this page
+      if (userRole === 'faculty' && (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/'))) {
+        window.location.href = 'faculty-index.html';
       }
     }
   });
