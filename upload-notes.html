@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload Notes | Faculty Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+    input[type="text"],
+    select,
+    input[type="file"] {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .logout {
+      text-align: right;
+      margin: 1rem;
+    }
+    .logout a {
+      text-decoration: none;
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="logout">
+  <a href="#" onclick="logout()">Logout</a>
+</div>
+
+<div class="container">
+  <h2>Upload Notes</h2>
+  <form id="uploadForm">
+    <label for="title">Title</label>
+    <input type="text" id="title" required>
+
+    <label for="year">Year</label>
+    <select id="year" required>
+      <option value="">Select Year</option>
+      <option value="first-year">First Year</option>
+      <option value="second-year">Second Year</option>
+      <option value="third-year">Third Year</option>
+      <option value="fourth-year">Fourth Year</option>
+    </select>
+
+    <label for="file">Choose File</label>
+    <input type="file" id="file" required>
+
+    <button type="submit">Upload</button>
+  </form>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
+    authDomain: "college-homepage-template.firebaseapp.com",
+    projectId: "college-homepage-template",
+    storageBucket: "college-homepage-template.appspot.com",
+    messagingSenderId: "306557815155",
+    appId: "1:306557815155:web:f805313ab13552af695d06"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const storage = getStorage(app);
+  const db = getFirestore(app);
+
+  onAuthStateChanged(auth, user => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+
+  window.logout = function () {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    });
+  };
+
+  document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("title").value.trim();
+    const year = document.getElementById("year").value;
+    const file = document.getElementById("file").files[0];
+
+    if (!title || !year || !file) {
+      alert("All fields are required!");
+      return;
+    }
+
+    const fileRef = ref(storage, `notes/${year}/${file.name}`);
+    try {
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+
+      await addDoc(collection(db, "notes"), {
+        title,
+        year,
+        fileUrl: downloadURL,
+        uploadedAt: new Date()
+      });
+
+      alert("File uploaded successfully!");
+      document.getElementById("uploadForm").reset();
+    } catch (err) {
+      console.error("Upload failed", err);
+      alert("Upload failed: " + err.message);
+    }
+  });
+</script>
+
+</body>
+</html>
