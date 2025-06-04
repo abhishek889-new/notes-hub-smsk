@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Notes Hub - Home</title>
   <style>
+    /* Your existing CSS styles here (same as before) */
     body, html {
       margin: 0;
       padding: 0;
@@ -180,7 +181,6 @@
 <div id="user-profile">
   <img id="profile-pic" src="" alt="Profile Picture" />
   <div id="profile-menu">
-    <!-- Changed Manage account link -->
     <button onclick="window.location.href='profile.html'">Manage your account</button>
     <button onclick="logout()">Log out</button>
   </div>
@@ -209,7 +209,6 @@
   </div>
 </div>
 
-<!-- Firebase auth and profile menu toggle -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
@@ -230,6 +229,7 @@
   const profileMenu = document.getElementById("profile-menu");
 
   window.logout = function () {
+    localStorage.removeItem("userRole");
     signOut(auth).then(() => {
       window.location.href = "login.html";
     }).catch((error) => {
@@ -245,8 +245,15 @@
     if (!user) {
       window.location.href = "login.html";
     } else {
-      profilePic.src = user.photoURL || "assets/images/default-avatar.png";
-      profilePic.style.display = "block";
+      const role = localStorage.getItem("userRole");
+      if (role === "faculty") {
+        // If faculty tries to open student index, redirect to faculty index
+        window.location.href = "faculty-index.html";
+      } else {
+        // Student user
+        profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+        profilePic.style.display = "block";
+      }
     }
   });
 </script>
