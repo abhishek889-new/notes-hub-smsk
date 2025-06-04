@@ -3,84 +3,250 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Faculty Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
-  <script type="module" src="firebase-config.js"></script> <!-- Your Firebase config -->
+  <title>Faculty Dashboard - Notes Hub</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
+    body, html {
       margin: 0;
       padding: 0;
-      background-color: #f4f6f8;
+      height: 100%;
+      font-family: Arial, sans-serif;
     }
-    header {
-      background-color: #003366;
+
+    .background {
+      position: relative;
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+    }
+
+    .background::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 1;
+    }
+
+    .button-container {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding-top: 80px;
       color: white;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      max-width: 700px;
+      margin: auto;
     }
-    h1 {
-      margin: 0;
+
+    .logo {
+      display: block;
+      margin: 20px auto;
+      max-width: 150px;
     }
-    button {
-      background-color: #e60000;
+
+    .college-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: red;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .credit-strip {
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .moving-text {
+      white-space: nowrap;
+      display: inline-block;
+      font-size: 16px;
+      color: #ffdf6c;
+      animation: slideText 12s linear infinite;
+    }
+
+    .moving-text:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes slideText {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .button-container h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    .button-container p {
+      font-size: 18px;
+      margin: 8px 0;
+      color: #f0f0f0;
+      animation: fadeInUp 1.5s ease-out;
+    }
+
+    .btn {
+      font-size: 18px;
+      padding: 12px 24px;
+      margin: 10px;
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.1);
       color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 4px;
+      border: 2px solid white;
+      border-radius: 5px;
+      transition: all 0.3s ease-in-out;
+      animation: fadeIn 2s ease-out;
+    }
+
+    .btn:hover {
+      background-color: white;
+      color: black;
+      transform: scale(1.05);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      .button-container h1 { font-size: 30px; }
+      .btn { width: 90%; margin: 10px auto; display: block; }
+    }
+
+    /* Profile avatar and menu */
+    #user-profile {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 3;
+    }
+
+    #profile-pic {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: none;
       cursor: pointer;
     }
-    .container {
-      padding: 20px;
+
+    #profile-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 160px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 5;
+    }
+
+    #profile-menu button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #profile-menu button:hover {
+      background-color: #f0f0f0;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Faculty Dashboard</h1>
-    <button id="logoutBtn">Logout</button>
-  </header>
-
-  <div class="container">
-    <h2>Welcome, Faculty!</h2>
-    <p>This is your dashboard. From here you can manage student data, upload notes, and much more.</p>
-
-    <!-- Placeholder for future sections -->
-    <div id="faculty-content">
-      <!-- Will fill this based on your next instructions -->
-    </div>
+<!-- Profile picture + dropdown -->
+<div id="user-profile">
+  <img id="profile-pic" src="" alt="Profile Picture" />
+  <div id="profile-menu">
+    <button onclick="window.location.href='profile.html'">Manage your account</button>
+    <button onclick="logout()">Log out</button>
   </div>
+</div>
 
-  <script type="module">
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { app } from './firebase-config.js';
+<div class="background">
+  <div class="button-container">
+    <a href="https://samskruti.ac.in/engineering/" target="_blank">
+      <img src="logo.png" alt="Samskruti College Logo" class="logo">
+    </a>
 
-    const auth = getAuth(app);
+    <div class="college-name">Samskruti College of Engg. and Tech</div>
 
-    // Check login
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-        // Not logged in — redirect
-        window.location.href = 'login.html';
-      }
+    <div class="credit-strip">
+      <div class="moving-text">Faculty Portal | Notes Hub | Created by: Manish Kain, Abhishek, Charan</div>
+    </div>
+
+    <h1>Welcome Faculty</h1>
+    <p>Manage and upload notes or content for students.</p>
+
+    <button class="btn" onclick="location.href='upload-notes.html'">Upload Notes</button>
+    <button class="btn" onclick="location.href='view-submissions.html'">View Submissions</button>
+    <button class="btn" onclick="location.href='manage-years.html'">Manage Years</button>
+  </div>
+</div>
+
+<!-- Firebase auth and profile menu toggle -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
+    authDomain: "college-homepage-template.firebaseapp.com",
+    projectId: "college-homepage-template",
+    storageBucket: "college-homepage-template.appspot.com",
+    messagingSenderId: "306557815155",
+    appId: "1:306557815155:web:f805313ab13552af695d06"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const profilePic = document.getElementById("profile-pic");
+  const profileMenu = document.getElementById("profile-menu");
+
+  window.logout = function () {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    }).catch((error) => {
+      console.error("Error signing out:", error);
     });
+  };
 
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      signOut(auth).then(() => {
-        window.location.href = 'login.html';
-      }).catch(error => {
-        console.error("Logout error:", error.message);
-        alert("Failed to logout.");
-      });
-    });
-  </script>
+  profilePic.addEventListener("click", () => {
+    profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+      profilePic.style.display = "block";
+    }
+  });
+</script>
 
 </body>
 </html>
