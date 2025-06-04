@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Faculty Dashboard - Notes Hub</title>
+  <title>Faculty Notes Hub - Home</title>
   <style>
+    /* Use the same CSS styling as index.html, or your faculty-specific styles */
+    /* You can reuse the exact same styles if you want identical look */
+
     body, html {
       margin: 0;
       padding: 0;
@@ -194,19 +197,18 @@
     <div class="college-name">Samskruti College of Engg. and Tech</div>
 
     <div class="credit-strip">
-      <div class="moving-text">Faculty Portal | Notes Hub | Created by: Manish Kain, Abhishek, Charan</div>
+      <div class="moving-text">Created by: Manish Kain, Abhishek, Charan</div>
     </div>
 
-    <h1>Welcome Faculty</h1>
-    <p>Manage and upload notes or content for students.</p>
+    <h1>Welcome Faculty to Notes Hub</h1>
+    <p>Your portal for managing academic notes and submissions.</p>
+    <p>Select an option below:</p>
 
     <button class="btn" onclick="location.href='upload-notes.html'">Upload Notes</button>
     <button class="btn" onclick="location.href='view-submissions.html'">View Submissions</button>
-    <button class="btn" onclick="location.href='manage-years.html'">Manage Years</button>
   </div>
 </div>
 
-<!-- Firebase auth and profile menu toggle -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
@@ -227,6 +229,7 @@
   const profileMenu = document.getElementById("profile-menu");
 
   window.logout = function () {
+    localStorage.removeItem("userRole");
     signOut(auth).then(() => {
       window.location.href = "login.html";
     }).catch((error) => {
@@ -242,8 +245,15 @@
     if (!user) {
       window.location.href = "login.html";
     } else {
-      profilePic.src = user.photoURL || "assets/images/default-avatar.png";
-      profilePic.style.display = "block";
+      const role = localStorage.getItem("userRole");
+      if (role === "student") {
+        // If student tries to open faculty index, redirect to student index
+        window.location.href = "index.html";
+      } else {
+        // Faculty user
+        profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+        profilePic.style.display = "block";
+      }
     }
   });
 </script>
