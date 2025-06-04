@@ -2,58 +2,262 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Faculty Dashboard | Notes Hub SMSK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Faculty Notes Hub - Home</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .background {
+      position: relative;
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+    }
+
+    .background::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 1;
+    }
+
+    .button-container {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding-top: 60px;
+      color: white;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .logo {
+      display: block;
+      margin: 10px auto 20px;
+      max-width: 120px;
+    }
+
+    .college-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff4d4d;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .credit-strip {
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .moving-text {
+      white-space: nowrap;
+      display: inline-block;
+      font-size: 15px;
+      color: #ffdf6c;
+      animation: slideText 12s linear infinite;
+    }
+
+    .moving-text:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes slideText {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .button-container h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    .button-container p {
+      font-size: 16px;
+      margin: 6px 0;
+      color: #f0f0f0;
+      animation: fadeInUp 1.5s ease-out;
+    }
+
+    .btn {
+      font-size: 17px;
+      padding: 12px 25px;
+      margin: 12px 10px;
+      cursor: pointer;
+      background-color: transparent;
+      color: white;
+      border: 2px solid white;
+      border-radius: 6px;
+      transition: all 0.3s ease-in-out;
+      animation: fadeIn 2s ease-out;
+    }
+
+    .btn:hover {
+      background-color: white;
+      color: black;
+      transform: scale(1.05);
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      .button-container h1 { font-size: 26px; }
+      .button-container p { font-size: 14px; }
+      .btn {
+        width: 90%;
+        display: block;
+        margin: 10px auto;
+      }
+    }
+
+    #user-profile {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 3;
+    }
+
+    #profile-pic {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: none;
+      cursor: pointer;
+      border: 2px solid white;
+    }
+
+    #profile-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 170px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 5;
+    }
+
+    #profile-menu button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #profile-menu button:hover {
+      background-color: #f5f5f5;
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome Faculty!</h1>
-  <button id="logout-btn">Logout</button>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+<!-- Profile picture + dropdown -->
+<div id="user-profile">
+  <img id="profile-pic" src="" alt="Profile Picture" />
+  <div id="profile-menu">
+    <button onclick="window.location.href='profile.html'">Manage your account</button>
+    <button onclick="logout()">Log out</button>
+  </div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
-      authDomain: "college-homepage-template.firebaseapp.com",
-      projectId: "college-homepage-template",
-      storageBucket: "college-homepage-template.appspot.com",
-      messagingSenderId: "306557815155",
-      appId: "1:306557815155:web:f805313ab13552af695d06"
-    };
+<div class="background">
+  <div class="button-container">
+    <a href="https://samskruti.ac.in/engineering/" target="_blank">
+      <img src="logo.png" alt="Samskruti College Logo" class="logo">
+    </a>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    <div class="college-name">Samskruti College of Engg. and Tech</div>
 
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-        localStorage.removeItem('userRole');
-        window.location.href = 'login.html';
-        return;
-      }
-      const role = localStorage.getItem('userRole');
-      if (!role) {
-        alert('User role missing. Please login again.');
-        auth.signOut();
-        localStorage.removeItem('userRole');
-        window.location.href = 'login.html';
-        return;
-      }
+    <div class="credit-strip">
+      <div class="moving-text">Created by: Manish Kain, Abhishek, Charan</div>
+    </div>
 
-      if (role !== 'faculty') {
-        // If role is student but on faculty page, redirect to student page
-        window.location.href = 'index.html';
-      }
+    <h1>Welcome Faculty to Notes Hub</h1>
+    <p>Your portal for managing academic notes and submissions.</p>
+    <p>Select an option below:</p>
 
-      // else user is faculty and can access this page
+    <button class="btn" onclick="location.href='upload-notes.html'">Upload Notes</button>
+    <button class="btn" onclick="location.href='view-submissions.html'">View Submissions</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
+    authDomain: "college-homepage-template.firebaseapp.com",
+    projectId: "college-homepage-template",
+    storageBucket: "college-homepage-template.appspot.com",
+    messagingSenderId: "306557815155",
+    appId: "1:306557815155:web:f805313ab13552af695d06"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const profilePic = document.getElementById("profile-pic");
+  const profileMenu = document.getElementById("profile-menu");
+
+  window.logout = function () {
+    localStorage.removeItem("userRole");
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    }).catch((error) => {
+      console.error("Error signing out:", error);
     });
+  };
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      auth.signOut().then(() => {
-        localStorage.removeItem('userRole');
-        window.location.href = 'login.html';
-      });
-    });
-  </script>
+  profilePic.addEventListener("click", () => {
+    profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      const role = localStorage.getItem("userRole");
+      if (role === "student") {
+        window.location.href = "index.html";
+      } else {
+        profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+        profilePic.style.display = "block";
+      }
+    }
+  });
+</script>
+
 </body>
 </html>
