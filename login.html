@@ -164,6 +164,9 @@
     if (isLogin) {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
+          // Save role persistently
+          localStorage.setItem('userRole', role);
+
           if (role === "faculty") {
             window.location.href = "faculty-index.html";
           } else {
@@ -196,6 +199,9 @@
 
     signInWithPopup(auth, provider)
       .then(() => {
+        // Save role persistently
+        localStorage.setItem('userRole', role);
+
         if (role === "faculty") {
           window.location.href = "faculty-index.html";
         } else {
