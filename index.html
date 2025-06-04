@@ -2,60 +2,236 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Student Dashboard | Notes Hub SMSK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notes Hub - Student</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    .background {
+      position: relative;
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+    }
+
+    .background::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 1;
+    }
+
+    .button-container {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding-top: 80px;
+      color: white;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .logo {
+      display: block;
+      margin: 20px auto;
+      max-width: 150px;
+    }
+
+    .college-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: red;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .credit-strip {
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .moving-text {
+      white-space: nowrap;
+      display: inline-block;
+      font-size: 16px;
+      color: #ffdf6c;
+      animation: slideText 12s linear infinite;
+    }
+
+    .moving-text:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes slideText {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .button-container h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    .button-container p {
+      font-size: 18px;
+      margin: 8px 0;
+      color: #f0f0f0;
+    }
+
+    .btn {
+      font-size: 18px;
+      padding: 12px 24px;
+      margin: 10px;
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 2px solid white;
+      border-radius: 5px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .btn:hover {
+      background-color: white;
+      color: black;
+      transform: scale(1.05);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 600px) {
+      .button-container h1 { font-size: 30px; }
+      .btn { width: 90%; margin: 10px auto; display: block; }
+    }
+
+    #user-profile {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 3;
+    }
+
+    #profile-pic {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: none;
+      cursor: pointer;
+    }
+
+    #profile-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 160px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 5;
+    }
+
+    #profile-menu button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #profile-menu button:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome Student!</h1>
-  <button id="logout-btn">Logout</button>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+<div id="user-profile">
+  <img id="profile-pic" src="" alt="Profile Picture" />
+  <div id="profile-menu">
+    <button onclick="window.location.href='profile.html'">Manage your account</button>
+    <button onclick="logout()">Log out</button>
+  </div>
+</div>
 
-    // Your Firebase config - keep same as login.html
-    const firebaseConfig = {
-      apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
-      authDomain: "college-homepage-template.firebaseapp.com",
-      projectId: "college-homepage-template",
-      storageBucket: "college-homepage-template.appspot.com",
-      messagingSenderId: "306557815155",
-      appId: "1:306557815155:web:f805313ab13552af695d06"
-    };
+<div class="background">
+  <div class="button-container">
+    <a href="https://samskruti.ac.in/engineering/" target="_blank">
+      <img src="logo.png" alt="Samskruti College Logo" class="logo">
+    </a>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    <div class="college-name">Samskruti College of Engg. and Tech</div>
 
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-        // Not logged in
-        localStorage.removeItem('userRole');
-        window.location.href = 'login.html';
-        return;
-      }
-      const role = localStorage.getItem('userRole');
-      if (!role) {
-        alert('User role missing. Please login again.');
-        auth.signOut();
-        localStorage.removeItem('userRole');
-        window.location.href = 'login.html';
-        return;
-      }
+    <div class="credit-strip">
+      <div class="moving-text">Created by: Manish Kain, Abhishek, Charan</div>
+    </div>
 
-      if (role !== 'student') {
-        // If role is faculty but on student page, redirect to faculty page
-        window.location.href = 'faculty-index.html';
-      }
+    <h1>Welcome to Notes Hub</h1>
+    <p>Access notes by year and subject.</p>
+    <button class="btn" onclick="window.location.href='first-year.html'">First Year</button>
+    <button class="btn" onclick="window.location.href='second-year.html'">Second Year</button>
+    <button class="btn" onclick="window.location.href='third-year.html'">Third Year</button>
+    <button class="btn" onclick="window.location.href='fourth-year.html'">Fourth Year</button>
+  </div>
+</div>
 
-      // else user is student and can access this page
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDXdxoVkeFgQnXStkPqVf0h5zOwA_TNDR4",
+    authDomain: "college-homepage-template.firebaseapp.com",
+    projectId: "college-homepage-template",
+    storageBucket: "college-homepage-template.appspot.com",
+    messagingSenderId: "306557815155",
+    appId: "1:306557815155:web:f805313ab13552af695d06"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const profilePic = document.getElementById("profile-pic");
+  const profileMenu = document.getElementById("profile-menu");
+
+  window.logout = function () {
+    localStorage.removeItem("userRole");
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    }).catch((error) => {
+      console.error("Error signing out:", error);
     });
+  };
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      auth.signOut().then(() => {
-        localStorage.removeItem('userRole');
-        window.location.href = 'login.html';
-      });
-    });
-  </script>
+  profilePic.addEventListener("click", () => {
+    profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      const role = localStorage.getItem("userRole");
+      if (role === "faculty") {
+        window.location.href = "faculty-index.html";
+      } else {
+        profilePic.src = user.photoURL || "assets/images/default-avatar.png";
+        profilePic.style.display = "block";
+      }
+    }
+  });
+</script>
+
 </body>
 </html>
