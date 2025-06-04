@@ -164,7 +164,11 @@
     if (isLogin) {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-          window.location.href = "index.html";
+          if (role === "faculty") {
+            window.location.href = "faculty-index.html";
+          } else {
+            window.location.href = "index.html";
+          }
         })
         .catch(error => {
           alert("Login error: " + error.message);
@@ -192,7 +196,11 @@
 
     signInWithPopup(auth, provider)
       .then(() => {
-        window.location.href = "index.html";
+        if (role === "faculty") {
+          window.location.href = "faculty-index.html";
+        } else {
+          window.location.href = "index.html";
+        }
       })
       .catch((error) => {
         alert("Google login error: " + error.message);
